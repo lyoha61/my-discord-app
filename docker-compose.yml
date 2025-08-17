@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    container_name: my_discord_app
+    ports: 
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
+  db: 
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root 
+      POSTGRES_DB: mydisdb     
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
