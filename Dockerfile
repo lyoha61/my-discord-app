@@ -1,12 +1,14 @@
 FROM node:20-alpine
 
-WORKDIR usr/src/app
+WORKDIR /usr/src/app
 
 COPY package*.json ./
 
 RUN npm install
 
 COPY . .
+
+RUN npx prisma generate
 
 ENV TZ=Europe/Moscow
 RUN apk add --no-cache tzdata \
@@ -17,4 +19,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:dev"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:dev"]
