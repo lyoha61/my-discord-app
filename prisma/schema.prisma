@@ -9,21 +9,25 @@ datasource db {
 
 
 model User {
-  id       Int    @id @default(autoincrement())
+  id       Int        @id @default(autoincrement())
   username String
-  email    String @unique
+  name     String
+  email    String     @unique
   password String
   messages Message[]
+  updated_at DateTime @default(now())
+  created_at DateTime @default(now())
 
   @@map("users")
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   text      String
-  createdAt DateTime @default(now())
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
+  updated_at DateTime @default(now())
+  created_at DateTime @default(now())
+  author    User      @relation(fields: [author_id], references: [id])
+  author_id  Int
 
   @@map("messages")
 }
