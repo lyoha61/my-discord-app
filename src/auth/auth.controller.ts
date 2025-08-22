@@ -1,0 +1,106 @@
+import { Controller, HttpCode, HttpStatus, Logger, Post, UnauthorizedException } from '@nestjs/common';
+import { Body } from '@nestjs/common';
+import RegisterUserDto from './dto/register-user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import bcrypt from 'bcrypt';
+import LoginUserDto from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { UserForToken } from './interfaces/user-for-token.interface';
+import { ConfigService } from '@nestjs/config';
+import { User } from '@prisma/client';
+
+@Controller('auth')
+export class AuthController {
+	private readonly accessTokenExpires: string;
+	private readonly refreshTokenExpires: string;
+
+	private readonly logger = new Logger(AuthController.name);
+
+	constructor(
+		private prisma: PrismaService,
+		private jwtService: JwtService,
+		private configService: ConfigService
+	) {
+		this.accessTokenExpires = this.configService.getOrThrow<string>('ACCESS_TOKEN_EXPIRES_IN');
+		this.refreshTokenExpires = this.configService.getOrThrow<string>('REFRESH_TOKEN_EXPIRES_IN');
+	}
+
+	private async hashPassword(password: string): Promise<string> {
+		const saltRounds = 10;
+		const hashedPass = await bcrypt.hash(password, saltRounds);
+		return hashedPass;
+	}
+
+	private async isPasswordValid(password: string, hashedPass: string): Promise<boolean> {
+		const isMatch = await bcrypt.compare(password, hashedPass);
+
+		if(!isMatch) throw new UnauthorizedException('Неверный email или пароль');
+
+		return true;
+	}
+
+	private async generateToken(user: UserForToken, expiresIn: string): Promise<string> {
+		const payload = { sub: user.id };
+		return this.jwtService.sign(payload, { expiresIn });
+	}
+
+	private async findUserByEmail(email: string): Promise<User> {
+		const user = await this.prisma.user.findUnique({
+			where: { email }
+		});
+		
+		if(!user) throw new UnauthorizedException ('Такого пользователя не существует');
+ 
+		return user;
+	}
+
+	@Post('/register')
+	@HttpCode(HttpStatus.CREATED)
+	async register(@Body() body: RegisterUserDto) {
+		try {
+			const { password, ...userData } = body;
+			const hashedPass = await this.hashPassword(password);
+
+			const { password: _, ...user } = await  this.prisma.user.create({
+				data: { ...userData, password: hashedPass }
+			})
+
+			this.logger.log(`Пользователь зарегистрирован id: ${user.id}`);
+			return user;
+		} catch (err) {
+			this.logger.error('Ошибка регистрации пользователя', err.stack);
+			throw err;
+		}		
+	}
+
+	@Post('/login')
+	async login(@Body() body: LoginUserDto) {
+		try {
+			const { email, password } = body;
+
+			const user = await this.findUserByEmail(email);
+
+			await this.isPasswordValid(password, user.password);
+
+			const [ accessToken, refreshToken ] = [
+				await this.generateToken(user, this.accessTokenExpires), 
+				await this.generateToken(user, this.refreshTokenExpires)
+			];
+
+			this.logger.log(`Пользователь залогинился id: ${user.id}`);
+			return {
+				message: 'Успешный вход',
+				user: { 
+					id:user.id, 
+					email: user.email,
+					access_token: accessToken,
+					refresh_token: refreshToken
+				}
+			}
+		} catch(err) {
+			this.logger.error('Ошибка логина', err.stack);
+			throw err;
+		}
+		
+	}
+}
