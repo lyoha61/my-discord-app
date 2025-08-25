@@ -2,7 +2,6 @@ import { useState } from "react";
 import { register } from "../services/auth";
 
 export const Register: React.FC  = () => {
-	const [username, setUsername] = useState<string>('');
 	const [email, setEmail] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	const [error, setError] = useState<string>('');
@@ -11,9 +10,10 @@ export const Register: React.FC  = () => {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
-		const res = await register(username, email, password);
-		localStorage.setItem('token', res.token);
-		setSuccess(`Пользователь ${res.user.username} зарегистрирован!`);
+		const res = await register(email, password);
+		const { refresh_token: refreshToken } = res.tokens;
+		localStorage.setItem('token', refreshToken);
+		setSuccess(`Пользователь ${res.user.email} зарегистрирован!`);
 		setError('');
 		} catch (err: unknown) {
 		  if (err instanceof Error) {
@@ -27,7 +27,6 @@ export const Register: React.FC  = () => {
 	return (
 		<form onSubmit={handleSubmit}>
 			<h1>Register</h1>
-			<input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
 			<input placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
 			<input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
 			<button type="submit">Register</button>

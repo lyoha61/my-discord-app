@@ -44,6 +44,17 @@ export class AuthController {
 		return this.jwtService.sign(payload, { expiresIn });
 	}
 
+	private async generateTokens(user: UserForToken): Promise<{ 
+		access_token:string; 
+		refresh_token: string 
+	}> {
+		const [ access_token, refresh_token ] = await Promise.all([
+			this.generateToken(user, this.accessTokenExpires), 
+			this.generateToken(user, this.refreshTokenExpires)
+		]);
+		return { access_token, refresh_token }
+	}
+
 	private async findUserByEmail(email: string): Promise<User> {
 		const user = await this.prisma.user.findUnique({
 			where: { email }
@@ -71,9 +82,13 @@ export class AuthController {
 			const { password: _, ...user } = await  this.prisma.user.create({
 				data: { username, email, password: hashedPass }
 			})
+			const tokens = await this.generateTokens(user); 
 
 			this.logger.log(`Пользователь зарегистрирован id: ${user.id}`);
-			return user;
+			return {
+				tokens,
+				user: user
+			};
 		} catch (err) {
 			this.logger.error('Ошибка регистрации пользователя', err.stack);
 			throw err;
@@ -89,19 +104,15 @@ export class AuthController {
 
 			await this.isPasswordValid(password, user.password);
 
-			const [ accessToken, refreshToken ] = [
-				await this.generateToken(user, this.accessTokenExpires), 
-				await this.generateToken(user, this.refreshTokenExpires)
-			];
+			const tokens = await this.generateTokens(user);
 
 			this.logger.log(`Пользователь залогинился id: ${user.id}`);
 			return {
 				message: 'Успешный вход',
+				tokens,
 				user: { 
 					id:user.id, 
 					email: user.email,
-					access_token: accessToken,
-					refresh_token: refreshToken
 				}
 			}
 		} catch(err) {
