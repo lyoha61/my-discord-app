@@ -54,15 +54,22 @@ export class AuthController {
 		return user;
 	}
 
+	private generateTemporaryUsername(email: string): string {
+		const basename = email.split('@')[0];
+		const randomSuffix = Math.floor(Math.random() * 10000);
+		return `user_${basename}${randomSuffix}`;
+	}
+
 	@Post('/register')
 	@HttpCode(HttpStatus.CREATED)
 	async register(@Body() body: RegisterUserDto) {
 		try {
-			const { password, ...userData } = body;
+			const { password, email } = body;
+			const username = this.generateTemporaryUsername(email);
 			const hashedPass = await this.hashPassword(password);
 
 			const { password: _, ...user } = await  this.prisma.user.create({
-				data: { ...userData, password: hashedPass }
+				data: { username, email, password: hashedPass }
 			})
 
 			this.logger.log(`Пользователь зарегистрирован id: ${user.id}`);
