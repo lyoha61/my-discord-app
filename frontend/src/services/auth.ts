@@ -9,5 +9,23 @@ export const register = async(
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ email, password })
 	});
-	return res.json();
+	return await res.json();
+}
+
+export const login = async(
+	email: string,
+	password: string,
+) => {
+	const res = await fetch('auth/login', {
+	method: 'POST',
+	headers: { 'Content-Type': 'application/json' },
+	body: JSON.stringify({ email, password })
+	});
+
+	const data = await res.json();
+	if (!res.ok) {
+		throw new Error(data.message);
+	}
+
+	return data;
 }
