@@ -40,7 +40,8 @@ export class ChatGateway {
       this.server.emit('message', {
         clientId: client.id,
         text: payload.text,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        author_id: savedMessage.author_id
       });
     } catch(err) {
       this.logger.error('Error on event "message"');

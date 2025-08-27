@@ -1,9 +1,9 @@
-import Chat from "../components/Chat";
+import Chat from "../components/Chat.js";
 
-const ChatPage: React.FC = () => {
+const HomePage: React.FC = () => {
 	return (
-		  <div className="chat-container">
-      <div className="chat-header">Чат</div>
+		  <div className="flex flex-col h-[93vh] bg-[#202329] rounded-lg">
+      <div className="vg p-4 chat-header text-left">Чат</div>
       <Chat />
       {/* <MessageList messages={messages} /> */}
       {/* <MessageInput onSendMessage={handleSendMessage} /> */}
@@ -12,4 +12,4 @@ const ChatPage: React.FC = () => {
 	)
 }
 
-export default ChatPage;
+export default HomePage;

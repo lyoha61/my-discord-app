@@ -1,9 +1,9 @@
 export interface Message {
 	id: number;
 	text: string;
-	createdAt: string;
-	updatedAt: string;
-	authorId: string;
+	created_at: string;
+	updated_at: string;
+	author_id: number;
 }
 
 export interface MessagesRes {
