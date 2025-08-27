@@ -11,7 +11,7 @@ import { MessagesService } from './messages.service';
 export class MessagesController {
 	private readonly logger = new Logger(MessagesController.name);
 
-	constructor(private messagesService: MessagesService) {}
+	constructor(private readonly messagesService: MessagesService) {}
 
 	@Get('/:messageId')
 	async getMessage( 
@@ -20,7 +20,7 @@ export class MessagesController {
 		@Param('messageId', ParseIntPipe) messageId: number
 	) {
 		this.logger.log(`Пользователь с id: ${userId} запросил ресурс ${req.method} ${req.originalUrl} `);
-		const message = this.messagesService.getMessage(messageId, userId);
+		const message = await this.messagesService.getMessage(messageId, userId);
 		return message;
 	}
 
@@ -28,9 +28,9 @@ export class MessagesController {
 	async getMessages(@Req() req: Request, @User('id') userId: number) {
 		this.logger.log(`Пользователь с id: ${userId} запросил ресурс ${req.method} ${req.originalUrl}`)
 
-		const messages = this.messagesService.getMessages();
+		const messages = await this.messagesService.getMessages();
 
-		return messages;	
+		return {messages: messages};	
 	}
 
 
@@ -40,7 +40,7 @@ export class MessagesController {
 		@Body() body: CreateMessageDto, 
 		@User('id') userId: number
 	) {
-		const message = this.messagesService.storeMessage(body.text, userId);
+		const message = await this.messagesService.storeMessage(body.text, userId);
 		return message;
 	}
 
@@ -50,7 +50,7 @@ export class MessagesController {
 		@User('id') userId: number,
 		@Param('messageId', ParseIntPipe) messageId: number
 	){
-		const updatedMessage = this.messagesService.updateMessage(
+		const updatedMessage = await  this.messagesService.updateMessage(
 			body.text, 
 			messageId, 
 			userId
@@ -64,7 +64,7 @@ export class MessagesController {
 		@User('id') userId: number,
 		@Param('messageId', ParseIntPipe) messageId: number
 	) {
-		this.messagesService.destroyMessage(messageId, userId);
+		await this.messagesService.destroyMessage(messageId, userId);
 		return {
 			status: 'success',
 			message_id: messageId

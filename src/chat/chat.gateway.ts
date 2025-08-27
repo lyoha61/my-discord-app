@@ -1,18 +1,23 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { WebSocketServer, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { timestamp } from 'rxjs';
 import { Server, Socket } from 'socket.io';
+import { MessagesService } from 'src/messages/messages.service';
+import { WsJwtGuard } from './guards/ws-jwt.guard';
 
 @WebSocketGateway({
   cors: {
     origin: '*',
   }
 })
+
 export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(ChatGateway.name);
+
+  constructor(private readonly messagesService: MessagesService) {}
 
   afterInit(server: Server) {
     this.logger.log('WebSocket Server Initialized');
@@ -22,13 +27,24 @@ export class ChatGateway {
     this.logger.log(`Client connected: ${client.id}`);
   }
 
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: any): void {
-    this.server.emit('message', {
-      id: client.id,
-      text: payload.text,
-      timestamp: new Date().toISOString()
-    });
+  async handleMessage(client: Socket, payload: any): Promise<void> {
+    try{
+      const userId = client.data.user.id;
+      const savedMessage = await this.messagesService.storeMessage(
+        payload.text,
+        userId
+      );
+
+      this.server.emit('message', {
+        clientId: client.id,
+        text: payload.text,
+        timestamp: new Date().toISOString()
+      });
+    } catch(err) {
+      this.logger.error('Error on event "message"');
+    }
   }
 
 }

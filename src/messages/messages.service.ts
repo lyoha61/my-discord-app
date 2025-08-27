@@ -50,6 +50,7 @@ export class MessagesService {
 
 	async storeMessage(text: string, userId: number) {
 		try {
+			if (!text || !userId) throw new Error('Invalid input data');
 			const message = await this.prisma.message.create({
 				data: {
 					text: text,
@@ -62,14 +63,17 @@ export class MessagesService {
 				}
 			});
 
-			this.logger.log(`Новое сообщение создано id: ${message.id}`);
+			this.logger.log(`Message saved in DB id: ${message.id}`);
 
 			return message;
 		} catch(err) {
-			this.logger.error('Ошибка при сохранении сообщения');
+			if (err instanceof Error) {
+				this.logger.error(err.message);
+			} else {
+				this.logger.error('Error saving message');
+			}
 			throw(err);
 		}
-		
 	}
 
 	async updateMessage(text: string, messageId: number, userId: number) {
