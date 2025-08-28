@@ -116,7 +116,6 @@ export class AuthController {
 				}
 			}
 		} catch(err) {
-			this.logger.error('Ошибка логина', err.stack);
 			throw err;
 		}
 		
