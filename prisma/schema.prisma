@@ -17,17 +17,40 @@ model User {
   messages Message[]
   updated_at DateTime @default(now())
   created_at DateTime @default(now())
+  chat_members ChatMember[]
 
   @@map("users")
 }
 
+model Chat {
+  id         Int       @id @default(autoincrement())
+  created_at DateTime  @default(now())
+  messages   Message[]
+  members    ChatMember[]
+
+  @@map("chats")
+}
+
 model Message {
-  id        Int       @id @default(autoincrement())
-  text      String
-  updated_at DateTime @default(now())
-  created_at DateTime @default(now())
-  author    User      @relation(fields: [author_id], references: [id])
-  author_id  Int
+  id              Int          @id @default(autoincrement())
+  text            String
+  updated_at      DateTime     @default(now())
+  created_at      DateTime     @default(now())
+  author          User         @relation(fields: [author_id], references: [id])
+  author_id       Int
+  chat            Chat @relation(fields: [chat_id], references: [id])
+  chat_id Int 
 
   @@map("messages")
+}
+
+model ChatMember {
+  id      Int  @id @default(autoincrement())
+  chat    Chat @relation(fields: [chat_id], references: [id])
+  chat_id Int
+  user    User @relation(fields: [user_id], references: [id]) 
+  user_id Int
+
+  @@unique([chat_id, user_id])
+  @@map("chats_members")
 }
