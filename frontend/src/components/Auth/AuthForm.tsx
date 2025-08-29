@@ -52,6 +52,7 @@ const AuthForm: React.FC<FromProps> = ({
 
 					{inputs.map(input => (
 						<Input
+						id={input.name}
 						name={input.name}
 						type={input.type}
 						label={input.label}

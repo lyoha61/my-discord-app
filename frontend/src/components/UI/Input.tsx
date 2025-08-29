@@ -2,12 +2,14 @@ import React from 'react';
 import cn from 'classnames';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  id: string;
   label?: string;
   error?: string;
   icon?: React.ReactNode;
 }
 
 const Input: React.FC<InputProps> = ({ 
+  id,
   label, 
   error, 
   icon,
@@ -30,6 +32,7 @@ const Input: React.FC<InputProps> = ({
         
         <input
           {...props}
+          id={id}
 					placeholder=' '
           className={cn(
 							"peer",
@@ -42,7 +45,7 @@ const Input: React.FC<InputProps> = ({
         />
 
 				<label 
-					htmlFor="{props.id}"
+					htmlFor={id}
 					className={cn(
 						"absolute left-4 top-[-1.4rem] text-gray-400 text-sm transition-all duration-200",
 						"peer-placeholder-shown:top-3.5",
