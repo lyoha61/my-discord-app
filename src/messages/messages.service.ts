@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class MessagesService {
 	private readonly logger = new Logger(MessagesService.name);
+
 	constructor(private prisma: PrismaService) {}
 
 	protected async findMessage(messageId: number, authorId: number): Promise<Message | null> {
@@ -48,17 +49,21 @@ export class MessagesService {
 		
 	}
 
-	async storeMessage(text: string, userId: number) {
+	async storeMessage(text: string, userId: number, chatId: number) {
 		try {
-			if (!text || !userId) throw new Error('Invalid input data');
+			if (!text || !userId || !chatId) throw new Error('Invalid input data');
 			const message = await this.prisma.message.create({
 				data: {
 					text: text,
 					author: {
 						connect: {
 							id: userId,
-							
 						} 
+					},
+					chat: {
+						connect: {
+							id: chatId
+						}
 					}
 				}
 			});
@@ -76,7 +81,7 @@ export class MessagesService {
 		}
 	}
 
-	async updateMessage(text: string, messageId: number, userId: number) {
+	async updateMessage(text: string, messageId: number, userId: number, chatId: number) {
 		try {
 			const message = await this.findMessage(messageId, userId);
 			if(!message) throw new NotFoundException(`Message with id: ${messageId} not found or you not athor`);
@@ -84,7 +89,8 @@ export class MessagesService {
 			const updatedMessage = await this.prisma.message.update({
 				where: {
 					id: messageId,
-					author_id: userId
+					author_id: userId,
+					chat_id: chatId
 				},
 				data: {
 					text

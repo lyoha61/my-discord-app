@@ -4,6 +4,8 @@ import { MessagesModule } from 'src/messages/messages.module';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ChatsController } from './chat.controller';
+import { ChatService } from './chat.service';
 
 
 @Module({
@@ -15,6 +17,7 @@ import { ConfigService } from '@nestjs/config';
       })
     })
   ],
-  providers: [ChatGateway, WsJwtGuard]
+  providers: [ChatGateway, WsJwtGuard, ChatService],
+  controllers: [ChatsController]
 })
 export class ChatModule {}

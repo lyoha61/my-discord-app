@@ -6,7 +6,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import UpdateMessageDto from './dto/update-message.dto';
 import { MessagesService } from './messages.service';
 
-@Controller('messages')
+@Controller('chats/:chatId/messages')
 @UseGuards(JwtAuthGuard)
 export class MessagesController {
 	private readonly logger = new Logger(MessagesController.name);
@@ -38,9 +38,11 @@ export class MessagesController {
 	@HttpCode(HttpStatus.CREATED)
 	async storeMessage(
 		@Body() body: CreateMessageDto, 
+		@Param('chatId', ParseIntPipe) chatId: number,
 		@User('id') userId: number
 	) {
-		const message = await this.messagesService.storeMessage(body.text, userId);
+		const { text } = body;
+		const message = await this.messagesService.storeMessage(text, userId, chatId);
 		return message;
 	}
 
@@ -48,12 +50,16 @@ export class MessagesController {
 	async updateMessage(
 		@Body() body: UpdateMessageDto,
 		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number
+		@Param('messageId', ParseIntPipe) messageId: number,
+		@Param('chatId', ParseIntPipe) chatId: number
 	){
+		const  { text } = body;
+
 		const updatedMessage = await  this.messagesService.updateMessage(
-			body.text, 
+			text, 
 			messageId, 
-			userId
+			userId,
+			chatId
 		);
 
 		return updatedMessage;

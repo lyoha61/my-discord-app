@@ -34,7 +34,8 @@ export class ChatGateway {
       const userId = client.data.user.id;
       const savedMessage = await this.messagesService.storeMessage(
         payload.text,
-        userId
+        userId,
+        payload.chadId
       );
 
       this.server.emit('message', {
