@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       '/auth': 'http://localhost:3000',
       '/messages': 'http://localhost:3000',
+      '/chats': 'http://localhost:3000'
     }
   }
 })

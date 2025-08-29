@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../hooks/useSocket"
 import { fetchMessages } from "../services/messageService";
 import type { Message } from "shared/types/message";
 
 const Chat: React.FC = () => {
-	const currentUserId = 2;
+	const currentUserId = 19;
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [inputMessage, setInputMessage] = useState('');
 	const socket = useSocket();
+
+	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -30,6 +32,10 @@ const Chat: React.FC = () => {
 		}
 	}, [socket]);
 
+	useEffect(() => {
+		messagesEndRef.current?.scrollIntoView({behavior: 'smooth'})
+	}, [messages]);
+
 	const sendMessage = () => {
 		if(!inputMessage.trim() || !socket) return;
 
@@ -38,22 +44,22 @@ const Chat: React.FC = () => {
 	}
 
 	return (
-		<div className="flex flex-col w-full h-full  text-white  shadow-lg">
-			<div className="flex-1 p-4 space-y-3">
+		<div className="flex flex-col h-full w-full max-w-2xl bg-[#0B0B0B] text-white  shadow-lg">
+			{/* Messages */}
+			<div className="flex-1 p-4 space-y-3 overflow-auto scrollbar-hidden">
 				{messages.map((msg) => (
-					<div 
-						key={msg.id} 
-						className={`flex ${
+					<div key={msg.id} 
+						className={`flex  ${
 							msg.author_id === currentUserId
 							? 'justify-end'
 							: 'justify-start'
 						}`}
 					>
 						
-						<div className={`max-w-xs px-4 py-2 rounded-2xl ${
+						<div className={`max-w-[65%] px-4 py-2 rounded-2xl ${
 							msg.author_id === currentUserId
-								? 'bg-[#6b8afd] text-white rounded-br-none'
-								: 'bg-[#2E343D] text-white rounded-bl-none'
+								? 'bg-[#4A90E2] text-white'
+								: 'bg-[#2A2A2A] text-white'
 							}`}>
 							<div className={`text-xs font-medium mb-1 ${
 								msg.author_id === currentUserId ? 'text-blue-100' : 'text-gray-400'
@@ -61,13 +67,18 @@ const Chat: React.FC = () => {
 								{msg.author_id === currentUserId ? 'Вы' : `User ${msg.author_id}`}
 							</div>
 							<div className="text-sm">{msg.text}</div>
+							<div className="text-sm mt-1">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
 						</div>
+
 					</div>
 				))}
+				<div ref={messagesEndRef}></div>
 			</div>
-			<div className="flex p-3">
+
+			{/* Input with button */}
+			<div className="flex p-3 bg-[#1A1A1A]">
 				<input
-					className="flex-1 px-4 py-2 rounded-lg bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 " 
+					className="flex-1 px-4 py-2 rounded-lg bg-[#2A2A2A] focus:outline-none" 
 					type="text"
 					value={inputMessage}
 					placeholder="Введите сообщение..." 
@@ -76,7 +87,7 @@ const Chat: React.FC = () => {
 				/>
 				<button 
 					onClick={sendMessage}
-					className="ml-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition font-medium"
+					className="ml-3 px-4 rounded-lg bg-[#4A90E2] hover:bg-[#4A90FA] transition font-medium cursor-pointer"
 				>
 					Отправить
 				</button>
