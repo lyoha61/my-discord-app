@@ -17,7 +17,7 @@ const Input: React.FC<InputProps> = ({
   ...props 
 }) => {
   const baseClass = 
-		"w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent transition-all duration-200";
+		"block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent transition-all duration-200";
   const focusClass = 
 		"focus:outline-none focus:border-white/80 focus:bg-white/10";
 
@@ -47,12 +47,14 @@ const Input: React.FC<InputProps> = ({
 				<label 
 					htmlFor={id}
 					className={cn(
-						"absolute left-4 top-[-1.4rem] text-gray-400 text-sm transition-all duration-200",
-						"peer-placeholder-shown:top-3.5",
-						"peer-focus:top-[-1.4rem] peer-focus:left-2"
-					)}
-				>
-					{label}
+            "absolute left-2 px-2 text-gray-400 dark:text-gray-400 duration-300 transform",
+            "peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-sm",
+            "peer-focus:top-2 peer-focus:-translate-y-7  peer-focus:text-xs peer-focus:text-white",
+            {
+              "left-8 peer-focus:left-2": icon
+            }
+          )}>
+            {label}
 				</label>
 
       </div>

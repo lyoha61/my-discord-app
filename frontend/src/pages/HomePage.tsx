@@ -1,14 +1,15 @@
 import Chat from "../components/Chat.js";
+import ChatList from "../components/ChatListHeader.js";
 import Sidebar from "../components/Sidebar.js";
 
 const HomePage: React.FC = () => {
 	return (
-    <div>
+    <div className="flex h-screen">
       <Sidebar />
-		  <div className="flex flex-col h-[93vh] bg-[#202329] rounded-lg">
-      <div className="vg p-4 chat-header text-left">Чат</div>
-      <Chat />
-    </div>
+      <ChatList />
+		  <div className="flex-1 flex-col max-h-screen items-center">
+        <Chat />
+      </div>
     </div>
      
 	)
