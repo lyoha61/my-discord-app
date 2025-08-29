@@ -3,8 +3,8 @@ import { Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class MessagesService {
-	private readonly logger = new Logger(MessagesService.name);
+export class MessageService {
+	private readonly logger = new Logger(MessageService.name);
 
 	constructor(private prisma: PrismaService) {}
 

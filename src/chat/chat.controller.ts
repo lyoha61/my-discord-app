@@ -3,7 +3,7 @@ import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 
 @Controller('chats')
-export class ChatsController {
+export class ChatController {
 
 	constructor(private readonly chatService: ChatService) {}
 

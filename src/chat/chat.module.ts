@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
-import { MessagesModule } from 'src/messages/messages.module';
+import { MessageModule } from 'src/message/message.module';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ChatsController } from './chat.controller';
+import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 
 
 @Module({
-  imports: [MessagesModule,
+  imports: [MessageModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -18,6 +18,6 @@ import { ChatService } from './chat.service';
     })
   ],
   providers: [ChatGateway, WsJwtGuard, ChatService],
-  controllers: [ChatsController]
+  controllers: [ChatController]
 })
 export class ChatModule {}

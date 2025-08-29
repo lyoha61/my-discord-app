@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MessagesModule } from './messages/messages.module';
+import { MessageModule } from './message/message.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
@@ -14,7 +14,7 @@ import { ChatModule } from './chat/chat.module';
       isGlobal: true,
       validate: (config) => envSchema.parse(config),
     }),
-    MessagesModule, 
+    MessageModule, 
     PrismaModule, 
     AuthModule, 
     ChatModule

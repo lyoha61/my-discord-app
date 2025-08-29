@@ -4,14 +4,14 @@ import CreateMessageDto from './dto/create-message.dto';
 import User from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import UpdateMessageDto from './dto/update-message.dto';
-import { MessagesService } from './messages.service';
+import { MessageService } from './message.service';
 
 @Controller('chats/:chatId/messages')
 @UseGuards(JwtAuthGuard)
-export class MessagesController {
-	private readonly logger = new Logger(MessagesController.name);
+export class MessageController {
+	private readonly logger = new Logger(MessageController.name);
 
-	constructor(private readonly messagesService: MessagesService) {}
+	constructor(private readonly messagesService: MessageService) {}
 
 	@Get('/:messageId')
 	async getMessage( 

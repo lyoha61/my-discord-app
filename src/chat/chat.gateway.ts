@@ -2,7 +2,7 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { WebSocketServer, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { timestamp } from 'rxjs';
 import { Server, Socket } from 'socket.io';
-import { MessagesService } from 'src/messages/messages.service';
+import { MessageService } from 'src/message/message.service';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 
 @WebSocketGateway({
@@ -17,7 +17,7 @@ export class ChatGateway {
 
   private readonly logger = new Logger(ChatGateway.name);
 
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(private readonly messageService: MessageService) {}
 
   afterInit(server: Server) {
     this.logger.log('WebSocket Server Initialized');
@@ -32,7 +32,7 @@ export class ChatGateway {
   async handleMessage(client: Socket, payload: any): Promise<void> {
     try{
       const userId = client.data.user.id;
-      const savedMessage = await this.messagesService.storeMessage(
+      const savedMessage = await this.messageService.storeMessage(
         payload.text,
         userId,
         payload.chadId
