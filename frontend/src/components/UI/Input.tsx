@@ -47,11 +47,11 @@ const Input: React.FC<InputProps> = ({
 				<label 
 					htmlFor={id}
 					className={cn(
-            "absolute left-2 px-2 text-gray-400 dark:text-gray-400 duration-300 transform",
-            "peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-sm",
+            "absolute left-1 text-xs top-2 px-2 -translate-y-7 text-gray-400 dark:text-gray-400 duration-300 transform",
+            "peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm",
             "peer-focus:top-2 peer-focus:-translate-y-7  peer-focus:text-xs peer-focus:text-white",
             {
-              "left-8 peer-focus:left-2": icon
+              "left-2 peer-placeholder-shown:left-8 peer-focus:left-2": icon
             }
           )}>
             {label}

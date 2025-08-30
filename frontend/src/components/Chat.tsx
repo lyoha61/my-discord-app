@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../hooks/useSocket"
 import type { Message } from "shared/types/message";
 import { getMessages } from "../services/messageService";
+import { getCurrentUserId } from "src/services/authService";
 
 const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
-	const currentUserId = 1;
+	const currentUserId = getCurrentUserId();
+
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [inputMessage, setInputMessage] = useState('');
 	const socket = useSocket();
@@ -40,6 +42,10 @@ const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
 		messagesEndRef.current?.scrollIntoView({behavior: 'smooth'})
 	}, [messages]);
 
+	if (!currentUserId) {
+		return <div>Пожалуйста, войдите, чтобы открыть чат</div>
+	}
+
 	const sendMessage = () => {
 		if(!inputMessage.trim() || !socket) return;
 
@@ -47,6 +53,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
 		setInputMessage('')
 	}
 
+	
 	return (
 		<div className="flex flex-col h-full w-full max-w-2xl bg-[#0B0B0B] text-white  shadow-lg">
 			{/* Messages */}

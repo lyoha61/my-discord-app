@@ -1,4 +1,18 @@
 import type { RegisterRes } from "shared/types/auth";
+import { jwtDecode } from "jwt-decode";
+
+export const getCurrentUserId = (): number | null  => {
+	const token = localStorage.getItem('token');
+	if (!token) return null;
+
+	try {
+		const decoded = jwtDecode<{sub: number}>(token);
+		return decoded.sub;
+	} catch (err) {
+		console.error("Failed to decode token", err);
+		return null;
+	}
+}
 
 export const register = async(
 	email: string,
