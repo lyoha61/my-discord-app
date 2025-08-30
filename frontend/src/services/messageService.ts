@@ -1,9 +1,8 @@
+import type { MessageResponse } from "shared/types/message";
 
-import type { MessagesRes } from "shared/types/message";
-
-export const fetchMessages = async(): Promise<MessagesRes> => {
+export const getMessages = async (chatId: number): Promise<MessageResponse> => {
 	const token = localStorage.getItem('token');
-	const res = await fetch('messages', {
+	const res = await fetch(`chats/${chatId}/messages`, {
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${token}`

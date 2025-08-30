@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../hooks/useSocket"
-import { fetchMessages } from "../services/messageService";
 import type { Message } from "shared/types/message";
+import { getMessages } from "../services/messageService";
 
-const Chat: React.FC = () => {
-	const currentUserId = 19;
+const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
+	const currentUserId = 1;
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [inputMessage, setInputMessage] = useState('');
 	const socket = useSocket();
@@ -12,15 +12,19 @@ const Chat: React.FC = () => {
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
-		const fetchData = async () => {
+		const fetchMessages = async () => {
 			try {
-				const data = await fetchMessages();
+				if(!chatId) return;
+
+				const data = await getMessages(chatId);
 				setMessages(data.messages);        
 			} catch (err) {
 				console.error(err);
 			}
 		};
-		fetchData();
+
+		fetchMessages();
+		
 		if(!socket) return;
 		
 		socket.on('message', (message: Message) => {
@@ -30,7 +34,7 @@ const Chat: React.FC = () => {
 		return () => {
 			socket.off('message');
 		}
-	}, [socket]);
+	}, [socket, chatId]);
 
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({behavior: 'smooth'})
@@ -39,14 +43,14 @@ const Chat: React.FC = () => {
 	const sendMessage = () => {
 		if(!inputMessage.trim() || !socket) return;
 
-		socket.emit('message', {text: inputMessage});
+		socket.emit('message', { text: inputMessage, chatId: 2 });
 		setInputMessage('')
 	}
 
 	return (
 		<div className="flex flex-col h-full w-full max-w-2xl bg-[#0B0B0B] text-white  shadow-lg">
 			{/* Messages */}
-			<div className="flex-1 p-4 space-y-3 overflow-auto scrollbar-hidden">
+			<div className="flex-1 flex flex-col justify-end p-4 space-y-3 overflow-auto scrollbar-hidden">
 				{messages.map((msg) => (
 					<div key={msg.id} 
 						className={`flex  ${

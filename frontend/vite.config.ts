@@ -7,9 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/auth': 'http://localhost:3000',
+      '/auth':     'http://localhost:3000',
       '/messages': 'http://localhost:3000',
-      '/chats': 'http://localhost:3000'
+      '/chats':    'http://localhost:3000',
+      '/users':    'http://localhost:3000'
     }
   }
 })
