@@ -35,7 +35,7 @@ export class ChatGateway {
       const savedMessage = await this.messageService.storeMessage(
         payload.text,
         userId,
-        payload.chadId
+        payload.chatId
       );
 
       this.server.emit('message', {
@@ -46,6 +46,7 @@ export class ChatGateway {
       });
     } catch(err) {
       this.logger.error('Error on event "message"');
+      throw err;
     }
   }
 

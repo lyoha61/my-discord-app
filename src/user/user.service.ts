@@ -9,7 +9,7 @@ export class UserService {
 
 	constructor(private readonly prisma: PrismaService) {}
 
-	async getUser(userId: number) {
+	async getUser(userId: number): Promise<UserDto> {
 		try {
 			const user = await this.prisma.user.findUnique({
 				where: { id: userId }

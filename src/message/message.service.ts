@@ -36,11 +36,8 @@ export class MessageService {
 		try {
 			const messages = await this.prisma.message.findMany();
 
-			if (messages.length === 0) {
-				return ({ 
-					messages: []
-				});
-			}
+			if (messages.length === 0) return [];
+
 			return messages;
 		} catch(err) {
 			this.logger.error('Ошибка при получении сообщений');
@@ -51,7 +48,7 @@ export class MessageService {
 
 	async storeMessage(text: string, userId: number, chatId: number) {
 		try {
-			if (!text || !userId || !chatId) throw new Error('Invalid input data');
+			if (!text || !userId || !chatId) throw new Error('Invalid input data for saving message');
 			const message = await this.prisma.message.create({
 				data: {
 					text: text,

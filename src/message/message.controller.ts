@@ -30,7 +30,7 @@ export class MessageController {
 
 		const messages = await this.messagesService.getMessages();
 
-		return {messages: messages};	
+		return {messages};	
 	}
 
 

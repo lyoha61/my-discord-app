@@ -5,6 +5,7 @@ import { AddMemberChatDto } from './dto/add-member.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import User from 'src/common/decorators/user.decorator';
 import { CreatePrivateChatDto } from './dto/create-private-chat.dto';
+import { ChatResponse, PrivateChatsResponse } from 'shared/types/chat';
 
 @Controller('chats')
 @UseGuards(JwtAuthGuard)
@@ -28,6 +29,26 @@ export class ChatController {
 		const { user_id: companionUserId } = body;
 		const chat = await this.chatService.getOrCreatePrivateChat(currentUserId, companionUserId); 
 		return chat;
+	}
+
+	@Get()
+	async getPrivateChats(
+		@User('id') userId: number 
+	): Promise< PrivateChatsResponse > {
+		const chats = await this.chatService.getPrivateChats(userId);
+
+		const formattedChats: ChatResponse[] = chats.map(chat => ({
+			id: chat.id,
+			created_at: chat.created_at.toISOString(),
+			members: chat.members
+				.filter(m => m.id !== userId)
+				.map(m => ({
+					id: m.id,
+					username: m.user.username
+				}))
+		}))
+
+		return { chats: formattedChats }
 	}
 
 	@Post()
