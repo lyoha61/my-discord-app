@@ -3,6 +3,8 @@ import { useSocket } from "../hooks/useSocket"
 import type { Message } from "shared/types/message";
 import { getMessages } from "../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
+import { motion, AnimatePresence } from "framer-motion";
+import PaperIcon from "../assets/icons/paper-plane.png";
 
 const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
 	const currentUserId = getCurrentUserId();
@@ -57,32 +59,40 @@ const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
 	return (
 		<div className="flex flex-col h-full w-full max-w-2xl bg-[#0B0B0B] text-white  shadow-lg">
 			{/* Messages */}
-			<div className="flex-1 flex flex-col justify-end p-4 space-y-3 overflow-auto scrollbar-hidden">
-				{messages.map((msg) => (
-					<div key={msg.id} 
-						className={`flex  ${
-							msg.author_id === currentUserId
-							? 'justify-end'
-							: 'justify-start'
-						}`}
-					>
-						
-						<div className={`max-w-[65%] px-4 py-2 rounded-2xl ${
-							msg.author_id === currentUserId
-								? 'bg-[#4A90E2] text-white'
-								: 'bg-[#2A2A2A] text-white'
-							}`}>
-							<div className={`text-xs font-medium mb-1 ${
-								msg.author_id === currentUserId ? 'text-blue-100' : 'text-gray-400'
+			<div className="flex-1 flex flex-col  p-4 space-y-3 overflow-auto scrollbar-hidden">
+				<div className="mt-auto"></div>
+				<AnimatePresence initial={false}>
+					{messages.map((msg) => (
+						<motion.div 
+							key={msg.id} 
+							initial={{ opacity: 0, y: 20, scale: 0.95 }}
+							animate={{ opacity: 1, y: 0, scale:1 }}
+							exit={{ opacity: 0, y: 20, scale: 0.95 }}
+							transition={{ duration: 0.25 }}
+							className={`flex ${
+								msg.author_id === currentUserId
+								? 'justify-end'
+								: 'justify-start'
+							}`}
+						>
+							
+							<div className={`max-w-[65%] px-4 py-2 rounded-2xl ${
+								msg.author_id === currentUserId
+									? 'bg-[#4A90E2] text-white'
+									: 'bg-[#2A2A2A] text-white'
 								}`}>
-								{msg.author_id === currentUserId ? 'Вы' : `User ${msg.author_id}`}
+								<div className={`text-xs font-medium mb-1 ${
+									msg.author_id === currentUserId ? 'text-blue-100' : 'text-gray-400'
+									}`}>
+									{msg.author_id === currentUserId ? 'Вы' : `User ${msg.author_id}`}
+								</div>
+								<div className="text-sm">{msg.text}</div>
+								<div className="text-sm mt-1">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
 							</div>
-							<div className="text-sm">{msg.text}</div>
-							<div className="text-sm mt-1">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
-						</div>
 
-					</div>
-				))}
+						</motion.div>
+					))}
+				</AnimatePresence>
 				<div ref={messagesEndRef}></div>
 			</div>
 
@@ -98,9 +108,9 @@ const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
 				/>
 				<button 
 					onClick={sendMessage}
-					className="ml-3 px-4 rounded-lg bg-[#4A90E2] hover:bg-[#4A90FA] transition font-medium cursor-pointer"
+					className="ml-3 px-2 transition font-medium cursor-pointer"
 				>
-					Отправить
+					<img className="h-6" src={PaperIcon} alt="" />
 				</button>
 			</div>
 		</div>
