@@ -21,7 +21,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 		
 		response.status(status).json({
 			path: request.url,
-			statusCode: 400,
+			statusCode: status,
 			message: exception instanceof Error 
 				? exception.message 
 				: 'Internal server error',

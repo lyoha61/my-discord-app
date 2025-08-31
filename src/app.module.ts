@@ -18,7 +18,8 @@ import { UserModule } from './user/user.module';
     MessageModule, 
     PrismaModule, 
     AuthModule, 
-    ChatModule, UserModule
+    ChatModule, 
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -22,7 +22,11 @@ export class UserService {
 			return plainToInstance(UserDto, user)
 		} catch (err) {
 			throw err;
-		}
-		
+		}	
+	}
+
+	async getUsers(): Promise<UserDto[]> {
+		const users = await this.prisma.user.findMany();
+		return plainToInstance(UserDto, users);
 	}
 }
