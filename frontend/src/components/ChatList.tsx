@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAvailableChats } from "../services/chatSevice"
-import { ChatListUser } from "./ChatListUser";
+import { UserCard } from "./UI/UserCard";
 import type { ChatResponse } from "shared/types/chat";
 
 
@@ -32,7 +32,7 @@ export const ChatList: React.FC< {onSelectChat: (chatId: number) => void} > =
           onClick={() => onSelectChat(chat.id)}
         >
           {chat.members.map(member => (
-            <ChatListUser member={member}/>
+            <UserCard member={member}/>
           ))}
           
         </div>

@@ -41,9 +41,9 @@ export class ChatController {
 			id: chat.id,
 			created_at: chat.created_at.toISOString(),
 			members: chat.members
-				.filter(m => m.id !== userId)
+				.filter(m => m.user_id !== userId)
 				.map(m => ({
-					id: m.id,
+					id: m.user_id,
 					username: m.user.username
 				}))
 		}))
