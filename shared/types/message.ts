@@ -6,6 +6,6 @@ export interface Message {
 	author_id: number;
 }
 
-export interface MessageResponse {
+export interface MessagesResponse {
 	messages: Message[];
 }

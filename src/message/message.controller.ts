@@ -5,6 +5,7 @@ import User from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import UpdateMessageDto from './dto/update-message.dto';
 import { MessageService } from './message.service';
+import { MessagesResponse } from 'shared/types/message';
 
 @Controller('chats/:chatId/messages')
 @UseGuards(JwtAuthGuard)
@@ -25,12 +26,22 @@ export class MessageController {
 	}
 
 	@Get()
-	async getMessages(@Req() req: Request, @User('id') userId: number) {
+	async getPrivateChatMessages(
+		@Req() req: Request, 
+		@User('id') userId: number,
+		@Param('chatId', ParseIntPipe) chatId: number
+	): Promise< MessagesResponse > {
 		this.logger.log(`Пользователь с id: ${userId} запросил ресурс ${req.method} ${req.originalUrl}`)
 
-		const messages = await this.messagesService.getMessages();
+		const messages = await this.messagesService.getPrivateChatMessages(chatId);
 
-		return {messages};	
+		const formattedMessages = messages.map(message => ({
+			...message,
+			created_at: message.created_at.toISOString(),
+			updated_at: message.updated_at.toISOString(),
+		}))
+
+		return { messages: formattedMessages };	
 	}
 
 

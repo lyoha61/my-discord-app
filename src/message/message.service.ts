@@ -32,18 +32,20 @@ export class MessageService {
 		}
 	}
 
-	async getMessages() {
+	async getPrivateChatMessages(chatId: number): Promise<Message[] | []> {
 		try {
-			const messages = await this.prisma.message.findMany();
+			const messages = await this.prisma.message.findMany({
+				where: {
+					chat_id: chatId
+				}
+			});
 
 			if (messages.length === 0) return [];
 
 			return messages;
-		} catch(err) {
-			this.logger.error('Ошибка при получении сообщений');
-			throw(err);
+		} catch (err) {
+			throw err;
 		}
-		
 	}
 
 	async storeMessage(text: string, userId: number, chatId: number) {
