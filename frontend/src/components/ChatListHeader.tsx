@@ -6,9 +6,10 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ChatResponse } from "shared/types/chat.js";
 
-export const ChatListHeader: React.FC = () => {
+export const ChatListHeader: React.FC<{ 
+	onOpenChat: (chat: ChatResponse) => void 
+}> = ({ onOpenChat }) => {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
-	const [currentChat, setCurrentChat] = useState<ChatResponse | null>(null);
 
 	const openSearch = () => setIsSearchOpen(true);
 	const closeSearch = () => setIsSearchOpen(false);
@@ -44,7 +45,7 @@ export const ChatListHeader: React.FC = () => {
 					<UserSearch 
 						onClose={closeSearch}
 						onOpenChat={(chat) => {
-							setCurrentChat(chat);
+							onOpenChat(chat);
 							closeSearch()
 						}}
 					/>

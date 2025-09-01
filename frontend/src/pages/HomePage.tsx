@@ -5,17 +5,20 @@ import { ChatListHeader } from "../components/ChatListHeader.js";
 import Sidebar from "../components/Sidebar.js";
 
 const HomePage: React.FC = () => {
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+  const [currentChatId, setCurrentChatId] = useState<number | null>(null);
 
 	return (
     <div className="flex h-screen">
       <Sidebar />
       <div className="flex flex-col bg-[#1A1A1A] border border-[#333333]">
-        <ChatListHeader />
-        <ChatList onSelectChat={setSelectedChatId}/>
+        <ChatListHeader onOpenChat={(chat) => setCurrentChatId(chat.id)} />
+        <ChatList 
+          onSelectChat={setCurrentChatId}
+          selectedChatId={currentChatId}
+        />
       </div>
 		  <div className="flex-1 flex-col max-h-screen items-center">
-        <Chat chatId={selectedChatId}/>
+        <Chat chatId={currentChatId}/>
       </div>
     </div>
      

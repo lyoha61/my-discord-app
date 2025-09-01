@@ -6,9 +6,8 @@ import { getCurrentUserId } from "src/services/authService";
 import { motion, AnimatePresence } from "framer-motion";
 import PaperIcon from "../assets/icons/paper-plane.png";
 
-const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
+const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
-
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [inputMessage, setInputMessage] = useState('');
 	const socket = useSocket();
@@ -51,7 +50,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({chatId}) => {
 	const sendMessage = () => {
 		if(!inputMessage.trim() || !socket) return;
 
-		socket.emit('message', { text: inputMessage, chatId: 2 });
+		socket.emit('message', { text: inputMessage, chatId });
 		setInputMessage('')
 	}
 

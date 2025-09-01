@@ -6,6 +6,7 @@ interface UserCardProps {
 	avatar?: string,
 	additionalText?: string,
 	isOnline?: boolean,
+	isSelected?: boolean,
 	onClick: (userId: number) => void
 }
 
@@ -14,6 +15,7 @@ export const UserCard: React.FC<UserCardProps> = ({
 	avatar,
 	additionalText,
 	isOnline,
+	isSelected,
 	onClick
 }) => {
 
@@ -23,17 +25,24 @@ export const UserCard: React.FC<UserCardProps> = ({
 
 	return (
 		<motion.div 
-			className="relative bg-[#1A1A1A] hover:bg-[#2A2A2A] cursor-pointer transition-all duration-300 h-20 pl-4 flex items-center gap-4"
+			className={`relative cursor-pointer transition-all duration-300 h-20 pl-4 flex items-center gap-4
+				${isSelected ? "bg-[#2A2A2A]" : "bg-[#1A1A1A] hover:bg-[#2A2A2A]"}	
+			`}
 			initial="rest"
-			whileHover="hover"
+			animate={isSelected ? "selected" : "rest"}
+			whileHover= {isSelected ? "seleceted" : "hover"}
 			onClick={handleClick}
 		>
 
 			<motion.div 
-				className="absolute left-0 top-0 w-0.5 h-full bg-[#4A90E2]"
+				className={`absolute left-0 top-0 w-0.5 h-full bg-[#4A90E2] 
+					${isSelected ? 'bg-[#4A90E2]' : ''}
+					
+				`}
 				variants={{
 					rest: { scaleY: 0 },
-					hover: { scaleY: 1}
+					hover: { scaleY: 1},
+					selected: { scaleY: 1 }
 				}}
 				style={{ originY: 0.5 }}
 				transition={{ type: 'tween', duration: 0.2 }}

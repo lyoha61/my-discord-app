@@ -4,8 +4,10 @@ import { UserCard } from "./UI/UserCard";
 import type { ChatResponse } from "shared/types/chat";
 
 
-export const ChatList: React.FC< {onSelectChat: (chatId: number) => void} > = 
-  ({ onSelectChat }) => {
+export const ChatList: React.FC<{
+  onSelectChat: (chatId: number) => void,
+  selectedChatId: number | null
+}> = ({ onSelectChat, selectedChatId }) => {
 
   const [chats, setChats] = useState<ChatResponse[]>([]);
 
@@ -26,17 +28,19 @@ export const ChatList: React.FC< {onSelectChat: (chatId: number) => void} > =
 	return (
 		<div>
       {chats.map(chat => (
-        <div 
-          key={chat.id}
-          className="cursor-pointer"
-          onClick={() => onSelectChat(chat.id)}
-        >
-          {chat.members.map(member => (
-            <UserCard member={member}/>
-          ))}
-          
-        </div>
-      ))}
+          <div 
+            key={chat.id}
+            className="cursor-pointer"
+          >
+            {chat.members.map(member => (
+              <UserCard 
+                member={member} 
+                isSelected={chat.id === selectedChatId}
+                onClick={() => onSelectChat(chat.id)}
+              />
+            ))}
+          </div>
+      ))} 
 		</div>
 	)
 }
