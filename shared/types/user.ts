@@ -1,10 +1,14 @@
-export interface UserResponse {
+export interface User {
 	id: number;
 	email: string;
-	name?: string;
+	name: string | null;
 	username: string;
-	created_at: Date;
-	updated_at: Date;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface UserResponse {
+	user: User
 }
 
 export interface UsersResponse {

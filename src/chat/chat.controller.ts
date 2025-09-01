@@ -3,7 +3,7 @@ import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { AddMemberChatDto } from './dto/add-member.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import User from 'src/common/decorators/user.decorator';
+import { User } from 'src/common/decorators/user.decorator';
 import { CreatePrivateChatDto } from './dto/create-private-chat.dto';
 import { ChatResponse, PrivateChatsResponse } from 'shared/types/chat';
 

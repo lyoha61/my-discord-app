@@ -1,7 +1,7 @@
 import {Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, Logger, Get, Param, ParseIntPipe, Delete, Patch } from '@nestjs/common';
 import type { Request } from 'express';
 import CreateMessageDto from './dto/create-message.dto';
-import User from 'src/common/decorators/user.decorator';
+import { User } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import UpdateMessageDto from './dto/update-message.dto';
 import { MessageService } from './message.service';
