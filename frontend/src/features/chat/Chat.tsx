@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { useSocket } from "../hooks/useSocket"
+import { useSocket } from "../../hooks/useSocket"
 import type { Message } from "shared/types/message";
-import { getMessages } from "../services/messageService";
+import { getMessages } from "../../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
 import { motion, AnimatePresence } from "framer-motion";
-import PaperIcon from "../assets/icons/paper-plane.png";
+import PaperIcon from "../../assets/icons/paper-plane.png";
 
 const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();

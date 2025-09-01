@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Chat from "../components/Chat.js";
-import { ChatList } from "../components/ChatList.js";
-import { ChatListHeader } from "../components/ChatListHeader.js";
+import Chat from "../features/chat/Chat.js";
+import { ChatList } from "../features/chat/ChatList.js";
+import { ChatListHeader } from "../features/chat/ChatListHeader.js";
 import Sidebar from "../components/Sidebar.js";
 
 const HomePage: React.FC = () => {

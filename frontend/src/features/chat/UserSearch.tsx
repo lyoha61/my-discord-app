@@ -1,9 +1,9 @@
-import Input from "./UI/Input"
-import SearchIcon from "../assets/icons/search.png";
+import Input from "../../components/UI/Input"
+import SearchIcon from "../../assets/icons/search.png";
 import { useEffect, useRef, useState } from "react";
 import { getUsers } from "src/services/userService";
 import type { UserResponse } from "shared/types/user";
-import { UserCard } from "./UI/UserCard";
+import { UserCard } from "../../components/UI/UserCard";
 import { motion } from "framer-motion";
 import type { ChatResponse } from "shared/types/chat";
 import { getOrCreatePrivateChat } from "src/services/chatSevice";

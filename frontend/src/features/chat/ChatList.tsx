@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getAvailableChats } from "../services/chatSevice"
-import { UserCard } from "./UI/UserCard";
+import { getAvailableChats } from "../../services/chatSevice"
+import { UserCard } from "../../components/UI/UserCard";
 import type { ChatResponse } from "shared/types/chat";
 
 
