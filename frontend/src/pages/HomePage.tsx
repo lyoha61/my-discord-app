@@ -3,6 +3,7 @@ import Chat from "../features/chat/Chat.js";
 import { ChatList } from "../features/chat/ChatList.js";
 import { ChatListHeader } from "../features/chat/ChatListHeader.js";
 import Sidebar from "../components/Sidebar.js";
+import { UserProfile } from "src/features/user/UserProfile.js";
 
 const HomePage: React.FC = () => {
   const [currentChatId, setCurrentChatId] = useState<number | null>(null);
@@ -10,12 +11,20 @@ const HomePage: React.FC = () => {
 	return (
     <div className="flex h-screen">
       <Sidebar />
-      <div className="flex flex-col bg-[#1A1A1A] border border-[#333333]">
-        <ChatListHeader onOpenChat={(chat) => setCurrentChatId(chat.id)} />
-        <ChatList 
-          onSelectChat={setCurrentChatId}
-          selectedChatId={currentChatId}
-        />
+      <div className="flex flex-col justify-between bg-[#1A1A1A] border border-[#333333]">
+        <div>
+          <ChatListHeader onOpenChat={(chat) => setCurrentChatId(chat.id)} />
+          <ChatList 
+            onSelectChat={setCurrentChatId}
+            selectedChatId={currentChatId}
+          />
+        </div>
+
+        <UserProfile 
+          username="test" 
+          isOnline={true}
+          />
+
       </div>
 		  <div className="flex-1 flex-col max-h-screen items-center">
         <Chat chatId={currentChatId}/>

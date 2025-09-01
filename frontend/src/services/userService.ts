@@ -26,3 +26,21 @@ export const getUsers = async (): Promise<UsersResponse>  => {
 
 	return data;
 }
+
+
+export const getMe = async (): Promise<UserResponse> => {
+	const token = localStorage.getItem('token');
+	const res = await fetch('users/me', {
+		headers: {
+			'Authorization': `Bearer ${token}`
+		}
+	})
+
+	if (!res.ok) {
+		console.error(await res.json());
+	}
+
+	const data = await res.json();
+
+	return data;
+}
