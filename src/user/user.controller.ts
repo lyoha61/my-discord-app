@@ -1,6 +1,6 @@
 import { Controller, Get, Logger, Param, ParseIntPipe, UseFilters, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserResponse, UsersResponse } from 'shared/types/user';
+import { User as UserType, UserResponse, UsersResponse } from 'shared/types/user';
 import { User } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UnauthorizedFilter } from 'src/filters/unauthorized.filter';
@@ -14,15 +14,14 @@ export class UserController {
 
 	constructor(private readonly userService: UserService) {}
 
-	private formattedUser (user: UserDto): UserResponse {
+	private formattedUser (user: UserDto): UserType {
 		return {
-			user: {
 				...user,
 				created_at: user.created_at.toISOString(),
 				updated_at: user.updated_at.toISOString()
-			}
 		}
 	}
+	
 
 	@Get('/me')
 	async getMe(
@@ -31,7 +30,7 @@ export class UserController {
 		this.logger.log(`User fetched data about himself ${userId}`)
 		const user = await this.userService.getMe(userId);
 
-		return this.formattedUser(user);
+		return {user: this.formattedUser(user)};
 	}
 
 	@Get(':userId')
@@ -40,7 +39,7 @@ export class UserController {
 	): Promise<UserResponse> {
 		const user = await this.userService.getUser(userId);
 
-		return this.formattedUser(user);
+		return {user: this.formattedUser(user)};
 	}
 
 	@Get()
@@ -50,8 +49,8 @@ export class UserController {
 		const users = await this.userService.getUsers();
 
 		const filteredUsers = users
-		.filter(user => user.id !== currentUserId)
-		.map(user => this.formattedUser(user));
+			.filter(user => user.id !== currentUserId)
+			.map(user => this.formattedUser(user));
 
 		return {users: filteredUsers}
 	}

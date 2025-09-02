@@ -1,4 +1,4 @@
-import { Controller, HttpCode, HttpStatus, Logger, Post, UnauthorizedException } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Logger, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Body } from '@nestjs/common';
 import RegisterUserDto from './dto/register-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,6 +8,11 @@ import { JwtService } from '@nestjs/jwt';
 import { UserForToken } from './interfaces/user-for-token.interface';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
+import { User as UserDecorator } from 'src/common/decorators/user.decorator';
+import { RefreshTokenService } from './refresh-token.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { UserService } from 'src/user/user.service';
+import { RefreshAccessTokenResponse } from 'shared/types/auth';
 
 @Controller('auth')
 export class AuthController {
@@ -18,8 +23,10 @@ export class AuthController {
 
 	constructor(
 		private prisma: PrismaService,
+		private refreshTokenService: RefreshTokenService, 
 		private jwtService: JwtService,
-		private configService: ConfigService
+		private configService: ConfigService,
+		private readonly userService: UserService
 	) {
 		this.accessTokenExpires = this.configService.getOrThrow<string>('ACCESS_TOKEN_EXPIRES_IN');
 		this.refreshTokenExpires = this.configService.getOrThrow<string>('REFRESH_TOKEN_EXPIRES_IN');
@@ -55,16 +62,6 @@ export class AuthController {
 		return { access_token, refresh_token }
 	}
 
-	private async findUserByEmail(email: string): Promise<User> {
-		const user = await this.prisma.user.findUnique({
-			where: { email }
-		});
-		
-		if(!user) throw new UnauthorizedException ('Такого пользователя не существует');
- 
-		return user;
-	}
-
 	private generateTemporaryUsername(email: string): string {
 		const basename = email.split('@')[0];
 		const randomSuffix = Math.floor(Math.random() * 10000);
@@ -84,7 +81,9 @@ export class AuthController {
 			})
 			const tokens = await this.generateTokens(user); 
 
-			this.logger.log(`Пользователь зарегистрирован id: ${user.id}`);
+			this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
+
+			this.logger.log(`User registered id: ${user.id}`);
 			return {
 				tokens,
 				user: user
@@ -100,13 +99,17 @@ export class AuthController {
 		try {
 			const { email, password } = body;
 
-			const user = await this.findUserByEmail(email);
+			const user = await this.userService.findUserByEmail(email);
+
+			if (!user) throw new UnauthorizedException(`User not found email:${email}`)
 
 			await this.isPasswordValid(password, user.password);
 
 			const tokens = await this.generateTokens(user);
 
-			this.logger.log(`Пользователь залогинился id: ${user.id}`);
+			this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
+
+			this.logger.log(`User logged in id: ${user.id}`);
 			return {
 				message: 'Успешный вход',
 				tokens,
@@ -117,6 +120,45 @@ export class AuthController {
 			}
 		} catch(err) {
 			throw err;
+		}
+	}
+
+	@Post('/logout')
+	async logout (
+		@UserDecorator('id') userId: number
+	): Promise<{ success: boolean }> {
+		try {
+			await this.refreshTokenService.deleteToken(userId);
+			 return { success: true }
+		} catch (err) {
+			throw err;
+		}
+	}
+
+	@Post('/refresh')
+	@UseGuards(JwtAuthGuard)
+	async refreshAccessToken(
+		@Body() body: { refresh_token: string },
+		@UserDecorator('id') userId: number
+	): Promise<RefreshAccessTokenResponse> {
+		this.logger.log(`User id: ${userId} fetched refresh token`);
+
+		const refreshToken = body.refresh_token;
+
+		if(!this.refreshTokenService.isTokenValid(userId, refreshToken))
+			throw new UnauthorizedException('Token invalid')
+
+		const user = await this.userService.getUser(userId);
+
+		const accessToken =  await this.generateToken(user, this.accessTokenExpires)
+
+		this.refreshTokenService.setToken(userId, accessToken);
+
+		this.logger.log(`Success refresh access token for user id: ${userId}`);
+
+		return { 
+			user_id: userId,
+			access_token: accessToken 
 		}
 		
 	}

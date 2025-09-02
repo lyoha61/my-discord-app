@@ -1,13 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDto } from './dto/user.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
 	private readonly logger = new Logger(UserService.name);
 
 	constructor(private readonly prisma: PrismaService) {}
+
+
+	async findUserByEmail(email: string): Promise<User | null> {
+		const user = await this.prisma.user.findUnique({
+			where: { email }
+		});
+
+		return user;
+	}
 
 	async getMe(userId: number): Promise<UserDto> {
 		try {
