@@ -9,3 +9,8 @@ export interface Message {
 export interface MessagesResponse {
 	messages: Message[];
 }
+
+export interface ClientMessagePayload {
+	text: string;
+	chat_id: number;
+}

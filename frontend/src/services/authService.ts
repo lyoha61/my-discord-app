@@ -7,10 +7,12 @@ let refreshTimeout: NodeJS.Timeout | null = null;
 
 export const saveTokens = (data: TokensResponse): void => {
 	accessToken = data.access_token;
-	refreshToken = data.refresh_token;
-
 	localStorage.setItem('access_token', accessToken);
-	localStorage.setItem('refresh_token', refreshToken);
+
+	if(data.refresh_token) {
+		refreshToken = data.refresh_token;
+		localStorage.setItem('refresh_token', refreshToken);
+	};
 
 	if(refreshTimeout) clearTimeout(refreshTimeout);
 	refreshTimeout = setTimeout(refreshAccessToken, (data.expires_in - 30 ) * 1000);
@@ -96,6 +98,6 @@ export const refreshAccessToken = async (): Promise<void> => {
 		return;
 	}
 
-	const data = await res.json();
+	const data: TokensResponse = await res.json();
 	saveTokens(data);
 };

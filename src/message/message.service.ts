@@ -48,7 +48,7 @@ export class MessageService {
 		}
 	}
 
-	async storeMessage(text: string, userId: number, chatId: number) {
+	async storeMessage(text: string, userId: number, chatId: number): Promise<Message> {
 		try {
 			if (!text || !userId || !chatId) throw new Error('Invalid input data for saving message');
 			const message = await this.prisma.message.create({

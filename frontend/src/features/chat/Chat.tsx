@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../../hooks/useSocket"
-import type { Message } from "shared/types/message";
+import type { ClientMessagePayload, Message } from "shared/types/message";
 import { getMessages } from "../../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,9 +48,14 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	}
 
 	const sendMessage = () => {
-		if(!inputMessage.trim() || !socket) return;
+		if(!inputMessage.trim() || !socket || !chatId) return;
 
-		socket.emit('message', { text: inputMessage, chatId });
+		const payload: ClientMessagePayload = {
+			text: inputMessage,
+			chat_id: chatId
+		}
+
+		socket.emit('message', payload);
 		setInputMessage('')
 	}
 
