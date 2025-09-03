@@ -12,5 +12,5 @@ export interface UserResponse {
 }
 
 export interface UsersResponse {
-	users: UserResponse[];
+	users: User[];
 }

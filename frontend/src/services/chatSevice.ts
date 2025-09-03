@@ -1,7 +1,8 @@
 import type { ChatResponse, PrivateChatsResponse } from "shared/types/chat";
+import { getAccessToken } from "./authService";
 
 export const getAvailableChats = async (): Promise<PrivateChatsResponse> => {
-	const token = localStorage.getItem('token');
+	const token = getAccessToken()
 	const res = await fetch('chats',{
 		method: 'GET',
 		headers: {
@@ -17,7 +18,7 @@ export const getAvailableChats = async (): Promise<PrivateChatsResponse> => {
 
 
 export const getOrCreatePrivateChat = async (userId: number): Promise<ChatResponse> => {
-	const token = localStorage.getItem('token');
+	const token = getAccessToken();
 	const res = await fetch('chats/private', {
 		method: "POST",
 		headers: {

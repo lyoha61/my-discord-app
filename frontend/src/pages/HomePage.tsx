@@ -20,10 +20,7 @@ const HomePage: React.FC = () => {
           />
         </div>
 
-        <UserProfile 
-          username="test" 
-          isOnline={true}
-          />
+        <UserProfile />
 
       </div>
 		  <div className="flex-1 flex-col max-h-screen items-center">

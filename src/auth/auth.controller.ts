@@ -7,17 +7,17 @@ import LoginUserDto from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserForToken } from './interfaces/user-for-token.interface';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@prisma/client';
 import { User as UserDecorator } from 'src/common/decorators/user.decorator';
 import { RefreshTokenService } from './refresh-token.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserService } from 'src/user/user.service';
-import { RefreshAccessTokenResponse } from 'shared/types/auth';
+import { RefreshAccessTokenResponse, TokensResponse } from 'shared/types/auth';
+import ms from 'ms';
 
 @Controller('auth')
 export class AuthController {
-	private readonly accessTokenExpires: string;
-	private readonly refreshTokenExpires: string;
+	private readonly accessTokenExpires: ms.StringValue;
+	private readonly refreshTokenExpires: ms.StringValue;
 
 	private readonly logger = new Logger(AuthController.name);
 
@@ -28,8 +28,8 @@ export class AuthController {
 		private configService: ConfigService,
 		private readonly userService: UserService
 	) {
-		this.accessTokenExpires = this.configService.getOrThrow<string>('ACCESS_TOKEN_EXPIRES_IN');
-		this.refreshTokenExpires = this.configService.getOrThrow<string>('REFRESH_TOKEN_EXPIRES_IN');
+		this.accessTokenExpires = this.configService.getOrThrow<ms.StringValue>('ACCESS_TOKEN_EXPIRES_IN');
+		this.refreshTokenExpires = this.configService.getOrThrow<ms.StringValue>('REFRESH_TOKEN_EXPIRES_IN');
 	}
 
 	private async hashPassword(password: string): Promise<string> {
@@ -95,7 +95,7 @@ export class AuthController {
 	}
 
 	@Post('/login')
-	async login(@Body() body: LoginUserDto) {
+	async login(@Body() body: LoginUserDto): Promise<TokensResponse> {
 		try {
 			const { email, password } = body;
 
@@ -111,12 +111,9 @@ export class AuthController {
 
 			this.logger.log(`User logged in id: ${user.id}`);
 			return {
-				message: 'Успешный вход',
-				tokens,
-				user: { 
-					id:user.id, 
-					email: user.email,
-				}
+				access_token: tokens.access_token,
+				refresh_token: tokens.refresh_token,
+				expires_in: Math.floor(ms(this.accessTokenExpires) / 1000 )
 			}
 		} catch(err) {
 			throw err;
@@ -158,7 +155,8 @@ export class AuthController {
 
 		return { 
 			user_id: userId,
-			access_token: accessToken 
+			access_token: accessToken,
+			expires_in: Math.floor(ms(this.accessTokenExpires) / 1000)
 		}
 		
 	}

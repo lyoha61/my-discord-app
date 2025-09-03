@@ -1,7 +1,9 @@
-import type { MessageResponse } from "shared/types/message";
+import type { MessagesResponse } from "shared/types/message";
+import { getAccessToken } from "./authService";
 
-export const getMessages = async (chatId: number): Promise<MessageResponse> => {
-	const token = localStorage.getItem('token');
+export const getMessages = async (chatId: number): Promise<MessagesResponse> => {
+	const token = getAccessToken();
+	
 	const res = await fetch(`chats/${chatId}/messages`, {
 		headers: {
 			'Content-Type': 'application/json',
@@ -9,5 +11,6 @@ export const getMessages = async (chatId: number): Promise<MessageResponse> => {
 		}
 	});
 	if(!res.ok) throw new Error('Failed to fetch messages');
+
 	return await res.json();
 }

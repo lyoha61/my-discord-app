@@ -5,12 +5,21 @@ export interface User {
 	email: string;  
 }
 
-export interface Tokens {
+export interface AccessTokenResponse {
 	access_token: string;
+	expires_in: number; 
+}
+
+export interface TokensResponse extends AccessTokenResponse {
 	refresh_token: string;
 }
 
+export interface RefreshAccessTokenResponse extends AccessTokenResponse {
+	user_id: number;
+}
+
 export interface RegisterRes {
-	tokens: Tokens;
+	tokens: TokensResponse;
 	user: User;
 }
+

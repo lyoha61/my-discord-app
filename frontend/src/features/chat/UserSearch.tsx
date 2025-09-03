@@ -2,7 +2,7 @@ import Input from "../../components/UI/Input"
 import SearchIcon from "../../assets/icons/search.png";
 import { useEffect, useRef, useState } from "react";
 import { getUsers } from "src/services/userService";
-import type { UserResponse } from "shared/types/user";
+import type { User } from "shared/types/user";
 import { UserCard } from "../../components/UI/UserCard";
 import { motion } from "framer-motion";
 import type { ChatResponse } from "shared/types/chat";
@@ -13,14 +13,14 @@ export const UserSearch: React.FC<{
 	onOpenChat: (chat: ChatResponse) => void
 }> = ({ onClose, onOpenChat }) => {
 
-	const [users, setUsers] = useState<UserResponse[]>([]);
+	const [users, setUsers] = useState<User[]>([]);
 	const modalRef = useRef<HTMLDivElement>(null);
 
 	const handleOverlayClick = (e: React.MouseEvent) => {
 		if(modalRef.current && !modalRef.current.contains(e.target as Node)) onClose();
 	}
 
-	const handleUserClick = async (user: UserResponse) => {
+	const handleUserClick = async (user: User) => {
 		const chat = await getOrCreatePrivateChat(user.id);
 		onOpenChat(chat);
 	}

@@ -16,9 +16,7 @@ function LoginPage() {
 
 			]}
 			onSubmit={async ({ email, password }) => {
-				const res = await login(email, password);
-				localStorage.setItem('token', res.tokens.access_token);
-				localStorage.setItem('refreshToken', res.tokens.refresh_token);
+				await login(email, password);
 				navigate('/home');
 			}}
 			footerText="Нет аккаунта?"

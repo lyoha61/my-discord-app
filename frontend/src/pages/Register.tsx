@@ -15,9 +15,7 @@ const RegisterPage: React.FC  = () => {
 
 			]}
 			onSubmit={async ({ email, password }) => {
-				const res = await register(email, password);
-				localStorage.setItem('token', res.tokens.access_token);
-				localStorage.setItem('refreshToken', res.tokens.refresh_token);
+				await register(email, password);
 				navigate('/home');
 			}}
 			footerText="Есть аккаунт?"
