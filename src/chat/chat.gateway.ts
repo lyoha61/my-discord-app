@@ -6,6 +6,7 @@ import { MessageService } from 'src/message/message.service';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 import type { ClientMessagePayload } from 'shared/types/message';
 import { MessageEvent } from './types/server-events';
+import { SocketAuth } from 'shared/types/auth';
 
 @WebSocketGateway({
   cors: {
@@ -26,6 +27,12 @@ export class ChatGateway {
   }
   
   handleConnection(client: any) {
+    const authData = client.handshake.auth as SocketAuth;
+    if (!authData.access_token) {
+      client.disconnect(true);
+      this.logger.error(`Access token is missing Client: ${client.id}`)
+      return
+    }
     this.logger.log(`Client connected: ${client.id}`);
   }
 

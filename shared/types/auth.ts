@@ -23,3 +23,7 @@ export interface RegisterRes {
 	user: User;
 }
 
+export interface SocketAuth {
+	access_token: string;
+}
+

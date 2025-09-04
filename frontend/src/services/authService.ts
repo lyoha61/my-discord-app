@@ -79,7 +79,6 @@ export const refreshAccessToken = async (): Promise<void> => {
 	const res = await fetch('auth/refresh', {
 		method: "POST",
 		headers: {
-			'Authorization': `Bearer ${accessToken}`,
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({ refresh_token : refreshToken })

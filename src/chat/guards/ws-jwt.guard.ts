@@ -13,11 +13,11 @@ export class WsJwtGuard implements CanActivate {
     context: ExecutionContext,
   ) {
     const client: Socket = context.switchToWs().getClient();
-    const token = client.handshake.auth?.access_token;
+    const token = client.handshake.auth.access_token;
     try {
       if(!token) throw new WsException('Token is missing');
 
-      const payload = this.jwtService.verify< {sub:number}>(token);
+      const payload = this.jwtService.verify<{ sub:number }>(token);
       client.data.user = {id: payload.sub}
       return true;
     } catch(err) {

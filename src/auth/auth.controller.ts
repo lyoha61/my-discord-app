@@ -9,15 +9,16 @@ import { UserForToken } from './interfaces/user-for-token.interface';
 import { ConfigService } from '@nestjs/config';
 import { User as UserDecorator } from 'src/common/decorators/user.decorator';
 import { RefreshTokenService } from './refresh-token.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserService } from 'src/user/user.service';
 import { RefreshAccessTokenResponse, TokensResponse } from 'shared/types/auth';
-import ms from 'ms';
+import ms, { StringValue } from 'ms';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 @Controller('auth')
 export class AuthController {
 	private readonly accessTokenExpires: ms.StringValue;
 	private readonly refreshTokenExpires: ms.StringValue;
+	private readonly REFRESH_SECRET: string;
 
 	private readonly logger = new Logger(AuthController.name);
 
@@ -30,6 +31,7 @@ export class AuthController {
 	) {
 		this.accessTokenExpires = this.configService.getOrThrow<ms.StringValue>('ACCESS_TOKEN_EXPIRES_IN');
 		this.refreshTokenExpires = this.configService.getOrThrow<ms.StringValue>('REFRESH_TOKEN_EXPIRES_IN');
+		this.REFRESH_SECRET = this.configService.getOrThrow<StringValue>('JWT_SECRET');
 	}
 
 	private async hashPassword(password: string): Promise<string> {
@@ -41,9 +43,21 @@ export class AuthController {
 	private async isPasswordValid(password: string, hashedPass: string): Promise<boolean> {
 		const isMatch = await bcrypt.compare(password, hashedPass);
 
-		if(!isMatch) throw new UnauthorizedException('Неверный email или пароль');
+		if(!isMatch) throw new UnauthorizedException('Invalid email or password');
 
 		return true;
+	}
+
+	private getUserFromToken(refreshToken: string): number {
+		const payload = jwt.verify(refreshToken, this.REFRESH_SECRET) as JwtPayload;
+
+		if (!payload.sub) {
+			throw new Error("No subject (sub) in token");
+		}
+
+		const userId = Number(payload.sub);
+
+		return userId;
 	}
 
 	private async generateToken(user: UserForToken, expiresIn: string): Promise<string> {
@@ -126,21 +140,21 @@ export class AuthController {
 	): Promise<{ success: boolean }> {
 		try {
 			await this.refreshTokenService.deleteToken(userId);
-			 return { success: true }
+			return { success: true }
 		} catch (err) {
 			throw err;
 		}
 	}
 
 	@Post('/refresh')
-	@UseGuards(JwtAuthGuard)
 	async refreshAccessToken(
 		@Body() body: { refresh_token: string },
-		@UserDecorator('id') userId: number
 	): Promise<RefreshAccessTokenResponse> {
-		this.logger.log(`User id: ${userId} fetched refresh token`);
-
+		
 		const refreshToken = body.refresh_token;
+		const userId = this.getUserFromToken(refreshToken);
+		console.log(userId);
+		this.logger.log(`User id: ${userId} fetched refresh token`);
 
 		if(!this.refreshTokenService.isTokenValid(userId, refreshToken))
 			throw new UnauthorizedException('Token invalid')
