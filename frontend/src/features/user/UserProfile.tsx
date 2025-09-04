@@ -4,6 +4,7 @@ import SignOutIcon from '../../assets/icons/sign-out.png';
 import { useEffect, useState } from 'react';
 import type { User } from 'shared/types/user';
 import { getMe } from 'src/services/userService';
+import { logout } from 'src/services/authService';
 
 export const UserProfile: React.FC = () => {
 
@@ -43,7 +44,12 @@ export const UserProfile: React.FC = () => {
 						alt="Иконка настройки" 
 					/>
 
-					<img className='cursor-pointer h-4.5' src={SignOutIcon} alt="" />
+					<img 
+						className='cursor-pointer h-4.5' 
+						src={SignOutIcon} 
+						alt="" 
+						onClick={logout}
+					/>
 					
 				</div>
 			</div>

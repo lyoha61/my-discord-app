@@ -67,6 +67,24 @@ export const login = async(
 	saveTokens(data);
 }
 
+export const logout = async () => {
+	const res = await fetch('auth/logout', {
+		method: 'POST',
+		headers: {
+			'Authorization': `Bearer ${accessToken}`
+		}
+	});
+
+	if (!res.ok) {
+		console.log(await res.json());
+	}
+
+	localStorage.removeItem('access_token');
+	localStorage.removeItem('refresh_token');
+
+	window.location.href = '/login';
+}
+
 export const refreshAccessToken = async (): Promise<void> => {
 	if (!refreshToken) {
 		refreshToken = localStorage.getItem("refresh_token")

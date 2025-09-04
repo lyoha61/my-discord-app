@@ -13,6 +13,7 @@ import { UserService } from 'src/user/user.service';
 import { RefreshAccessTokenResponse, TokensResponse } from 'shared/types/auth';
 import ms, { StringValue } from 'ms';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -134,12 +135,14 @@ export class AuthController {
 		}
 	}
 
+	@UseGuards(JwtAuthGuard)
 	@Post('/logout')
 	async logout (
 		@UserDecorator('id') userId: number
 	): Promise<{ success: boolean }> {
 		try {
 			await this.refreshTokenService.deleteToken(userId);
+			this.logger.log(`User ${userId} logout`);
 			return { success: true }
 		} catch (err) {
 			throw err;
