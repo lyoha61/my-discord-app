@@ -1,10 +1,21 @@
 import type { MessagesResponse } from "shared/types/message";
 import { getAccessToken } from "./authService";
 
-export const getMessages = async (chatId: number): Promise<MessagesResponse> => {
+interface GetMessagesOptions {
+	sort?: 'asc' | 'desc'
+}
+
+export const getMessages = async (
+	chatId: number, 
+	options: GetMessagesOptions = {}
+): Promise<MessagesResponse> => {
 	const token = getAccessToken();
+
+	const params = new URLSearchParams();
+	if (options.sort) params.append('sort', options.sort);
+		else params.append('sort', 'asc');
 	
-	const res = await fetch(`chats/${chatId}/messages`, {
+	const res = await fetch(`chats/${chatId}/messages?${params.toString()}`, {
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${token}`

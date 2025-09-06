@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GetMessagesDto } from './dto/get-messages.dto';
 
 @Injectable()
 export class MessageService {
@@ -32,12 +33,17 @@ export class MessageService {
 		}
 	}
 
-	async getPrivateChatMessages(chatId: number): Promise<Message[] | []> {
+	async getPrivateChatMessages(
+		chatId: number, 
+		query: GetMessagesDto
+	): Promise<Message[]> {
+		const { sort = 'asc'} = query;
 		try {
 			const messages = await this.prisma.message.findMany({
 				where: {
 					chat_id: chatId
-				}
+				},
+				orderBy: {created_at: sort}
 			});
 
 			if (messages.length === 0) return [];

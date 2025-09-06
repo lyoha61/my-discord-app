@@ -1,4 +1,4 @@
-import {Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, Logger, Get, Param, ParseIntPipe, Delete, Patch } from '@nestjs/common';
+import {Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, Logger, Get, Param, ParseIntPipe, Delete, Patch, Query } from '@nestjs/common';
 import type { Request } from 'express';
 import CreateMessageDto from './dto/create-message.dto';
 import { User } from 'src/common/decorators/user.decorator';
@@ -6,6 +6,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import UpdateMessageDto from './dto/update-message.dto';
 import { MessageService } from './message.service';
 import { MessagesResponse } from 'shared/types/message';
+import { GetMessagesDto } from './dto/get-messages.dto';
 
 @Controller('chats/:chatId/messages')
 @UseGuards(JwtAuthGuard)
@@ -29,11 +30,12 @@ export class MessageController {
 	async getPrivateChatMessages(
 		@Req() req: Request, 
 		@User('id') userId: number,
-		@Param('chatId', ParseIntPipe) chatId: number
+		@Param('chatId', ParseIntPipe) chatId: number,
+		@Query() query: GetMessagesDto
 	): Promise< MessagesResponse > {
-		this.logger.log(`Пользователь с id: ${userId} запросил ресурс ${req.method} ${req.originalUrl}`)
+		this.logger.log(`User id: ${userId} fetched ${req.method} ${req.originalUrl}`)
 
-		const messages = await this.messagesService.getPrivateChatMessages(chatId);
+		const messages = await this.messagesService.getPrivateChatMessages(chatId, query);
 
 		const formattedMessages = messages.map(message => ({
 			...message,

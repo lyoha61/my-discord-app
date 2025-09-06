@@ -14,6 +14,30 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
+	let lastDate = '';
+
+	const formatDate = (dateStr: string) => {
+		const date = new Date(dateStr);
+		const today = new Date();
+		const options: Intl.DateTimeFormatOptions = {
+			day: 'numeric',
+			month: 'long'
+		}
+
+		const isToday = 
+			date.getDate() === today.getDate() &&
+			date.getMonth() === today.getMonth() &&
+			date.getFullYear() === today.getFullYear();
+		
+		if (isToday) return 'Сегодня'
+		
+		if (date.getFullYear() !== today.getFullYear()) {
+			options.year = 'numeric'
+		}
+
+		return date.toLocaleDateString('ru-RU', options);
+	}
+
 	useEffect(() => {
 		const fetchMessages = async () => {
 			try {
@@ -66,36 +90,51 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 			<div className="flex-1 flex flex-col  p-4 space-y-3 overflow-auto scrollbar-hidden">
 				<div className="mt-auto"></div>
 				<AnimatePresence initial={false}>
-					{messages.map((msg) => (
-						<motion.div 
-							key={msg.id} 
-							initial={{ opacity: 0, y: 20, scale: 0.95 }}
-							animate={{ opacity: 1, y: 0, scale:1 }}
-							exit={{ opacity: 0, y: 20, scale: 0.95 }}
-							transition={{ duration: 0.25 }}
-							className={`flex ${
-								msg.author_id === currentUserId
-								? 'justify-end'
-								: 'justify-start'
-							}`}
-						>
-							
-							<div className={`max-w-[65%] px-4 py-2 rounded-2xl ${
-								msg.author_id === currentUserId
-									? 'bg-[#4A90E2] text-white'
-									: 'bg-[#2A2A2A] text-white'
-								}`}>
-								<div className={`text-xs font-medium mb-1 ${
-									msg.author_id === currentUserId ? 'text-blue-100' : 'text-gray-400'
-									}`}>
-									{msg.author_id === currentUserId ? 'Вы' : `User ${msg.author_id}`}
-								</div>
-								<div className="text-sm">{msg.text}</div>
-								<div className="text-sm mt-1">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
-							</div>
+					{messages.map((msg) => {
+						const currentDate = formatDate(msg.created_at);
+						const showDate = currentDate !== lastDate;
+						lastDate = currentDate;
+						return (
+							<div>
+								{showDate && (
+									<div className="flex justify-center">
+										<div className="bg-[#393939] rounded-full py-2 px-4 text-xs text-[#D1D5DB]">
+											{currentDate}
+										</div>
+									</div>
+								)}
 
-						</motion.div>
-					))}
+								<motion.div 
+									key={msg.id} 
+									initial={{ opacity: 0, y: 20, scale: 0.95 }}
+									animate={{ opacity: 1, y: 0, scale:1 }}
+									exit={{ opacity: 0, y: 20, scale: 0.95 }}
+									transition={{ duration: 0.25 }}
+									className={`flex ${
+										msg.author_id === currentUserId
+										? 'justify-end'
+										: 'justify-start'
+									}`}
+								>
+									
+									<div className={`max-w-[65%] px-4 py-2 rounded-2xl ${
+										msg.author_id === currentUserId
+											? 'bg-[#4A90E2] text-white'
+											: 'bg-[#2A2A2A] text-white'
+										}`}>
+										<div className={`text-xs font-medium mb-1 ${
+											msg.author_id === currentUserId ? 'text-blue-100' : 'text-gray-400'
+											}`}>
+											{msg.author_id === currentUserId ? 'Вы' : `User ${msg.author_id}`}
+										</div>
+										<div className="text-sm">{msg.text}</div>
+										<div className="text-sm mt-1">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
+									</div>
+
+								</motion.div>
+							</div>
+						);
+					})}
 				</AnimatePresence>
 				<div ref={messagesEndRef}></div>
 			</div>
