@@ -1,13 +1,16 @@
-export interface Message {
-	id: number;
-	text: string;
+import { Message } from "@prisma/client";
+
+export type ClientMessage = Omit<Message, 'created_at' | 'updated_at'> & {
 	created_at: string;
 	updated_at: string;
-	author_id: number;
+}
+
+export interface MessageEvent extends ClientMessage {
+	client_id: string;
 }
 
 export interface MessagesResponse {
-	messages: Message[];
+	messages: ClientMessage[];
 }
 
 export interface ClientMessagePayload {

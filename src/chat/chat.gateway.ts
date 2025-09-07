@@ -4,8 +4,8 @@ import { timestamp } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from 'src/message/message.service';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
-import type { ClientMessagePayload } from 'shared/types/message';
-import { MessageEvent } from './types/server-events';
+import type { ClientMessage, ClientMessagePayload, MessageEvent } from 'shared/types/message';
+
 import { SocketAuth } from 'shared/types/auth';
 
 @WebSocketGateway({
@@ -42,17 +42,21 @@ export class ChatGateway {
     try{
       const userId = client.data.user.id;
 
-      const savedMessage = await this.messageService.storeMessage(
+      const message = await this.messageService.storeMessage(
         payload.text,
         userId,
         payload.chat_id
       );
 
+      const formattedMessage: ClientMessage = {
+        ...message,
+        created_at: message.created_at.toISOString(),
+        updated_at: message.updated_at.toISOString()
+      }
+
       const eventPayload: MessageEvent = {
         client_id: client.id,
-        text: payload.text,
-        created_at: new Date().toISOString(),
-        author_id: savedMessage.author_id
+        ...formattedMessage
       }
 
       this.server.emit('message', eventPayload);
