@@ -24,12 +24,12 @@ export class MessageService {
 		try {
 			const message = await this.findMessage(messageId, userId);
 
-			if(!message) throw new NotFoundException(`Message with id: ${messageId} not found or you not athor`);
+			if(!message) throw new NotFoundException(`Message not found or access denied`);
 
 			return message;
 		} catch (err) {
-			this.logger.error(`Ошибка получения сообщения с id: ${messageId}`);
-			throw(err);
+			this.logger.error(`Failed get message id: ${messageId}`);
+			throw err;
 		}
 	}
 

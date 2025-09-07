@@ -25,3 +25,22 @@ export const getMessages = async (
 
 	return await res.json();
 }
+
+export const deleteMessage = async (chatId: number, messageId: number): Promise<void> => {
+	const token = getAccessToken();
+
+	if (!token) throw new Error('Missing access token');
+
+	const res = await fetch(`chats/${chatId}/messages/${messageId}`, {
+		method: "DELETE",
+		headers: {
+			'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!res.ok) {
+		const data = await res.json();
+		console.error(data)
+		throw new Error(data);
+	}
+}

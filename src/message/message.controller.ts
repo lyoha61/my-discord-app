@@ -83,10 +83,10 @@ export class MessageController {
 		@User('id') userId: number,
 		@Param('messageId', ParseIntPipe) messageId: number
 	) {
+		await this.messagesService.getMessage(messageId, userId);
+		
 		await this.messagesService.destroyMessage(messageId, userId);
-		return {
-			status: 'success',
-			message_id: messageId
-		}
+
+		return;
 	}
 }
