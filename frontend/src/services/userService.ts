@@ -1,5 +1,4 @@
 import type { UserResponse, UsersResponse } from "shared/types/user";
-import { getAccessToken } from "./authService";
 
 export const getUser = async (userId: number): Promise<UserResponse> => {
 	const res = await fetch(`users/${userId}`);
@@ -14,12 +13,7 @@ export const getUser = async (userId: number): Promise<UserResponse> => {
 }
 
 export const getUsers = async (): Promise<UsersResponse>  => {
-	const token = getAccessToken();
-	const res = await fetch('users', {
-		headers: {
-			'Authorization': `Bearer ${token}`
-		}
-	});
+	const res = await fetch('users');
 	if (!res.ok) {
 		console.error(await res.json());
 	}
@@ -30,12 +24,7 @@ export const getUsers = async (): Promise<UsersResponse>  => {
 
 
 export const getMe = async (): Promise<UserResponse> => {
-	const token = getAccessToken();
-	const res = await fetch('users/me', {
-		headers: {
-			'Authorization': `Bearer ${token}`
-		}
-	})
+	const res = await fetch('users/me')
 
 	if (!res.ok) {
 		console.error(await res.json());

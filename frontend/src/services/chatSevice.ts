@@ -1,15 +1,7 @@
 import type { ChatResponse, PrivateChatsResponse } from "shared/types/chat";
-import { getAccessToken } from "./authService";
 
 export const getAvailableChats = async (): Promise<PrivateChatsResponse> => {
-	const token = getAccessToken()
-	const res = await fetch('chats',{
-		method: 'GET',
-		headers: {
-			'Authorization': `Bearer ${token}`,
-			'Content-Type': 'application/json'
-		}
-	});
+	const res = await fetch('chats');
 
 	if(!res.ok) throw new Error('Failed to fetch chats');
 
@@ -18,11 +10,9 @@ export const getAvailableChats = async (): Promise<PrivateChatsResponse> => {
 
 
 export const getOrCreatePrivateChat = async (userId: number): Promise<ChatResponse> => {
-	const token = getAccessToken();
 	const res = await fetch('chats/private', {
 		method: "POST",
 		headers: {
-			'Authorization': `Bearer ${token}`,
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({ user_id: userId})
