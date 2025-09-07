@@ -1,7 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Message } from '@prisma/client';
+import { Message, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetMessagesDto } from './dto/get-messages.dto';
+import { MessageWithAuthor } from './types/message';
 
 @Injectable()
 export class MessageService {
@@ -40,12 +41,15 @@ export class MessageService {
 	async getPrivateChatMessages(
 		chatId: number,
 		query: GetMessagesDto,
-	): Promise<Message[]> {
+	): Promise<MessageWithAuthor[]> {
 		const { sort = 'asc' } = query;
 		try {
 			const messages = await this.prisma.message.findMany({
 				where: {
 					chat_id: chatId,
+				},
+				include: {
+					author: true
 				},
 				orderBy: { created_at: sort },
 			});
@@ -62,7 +66,7 @@ export class MessageService {
 		text: string,
 		userId: number,
 		chatId: number,
-	): Promise<Message> {
+	): Promise<MessageWithAuthor> {
 		try {
 			if (!text || !userId || !chatId)
 				throw new Error('Invalid input data for saving message');
@@ -80,6 +84,9 @@ export class MessageService {
 						},
 					},
 				},
+				include: {
+					author: true
+				}
 			});
 
 			this.logger.log(`Message saved in DB id: ${message.id}`);

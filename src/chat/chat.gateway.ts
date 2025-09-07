@@ -58,8 +58,11 @@ export class ChatGateway {
 				payload.chat_id,
 			);
 
+			const {author, ...rest} = message;
+
 			const formattedMessage: ClientMessage = {
-				...message,
+				...rest,
+				author_name: message.author.username,
 				created_at: message.created_at.toISOString(),
 				updated_at: message.updated_at.toISOString(),
 			};

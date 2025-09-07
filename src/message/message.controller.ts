@@ -59,11 +59,15 @@ export class MessageController {
 			query,
 		);
 
-		const formattedMessages = messages.map((message) => ({
-			...message,
-			created_at: message.created_at.toISOString(),
-			updated_at: message.updated_at.toISOString(),
-		}));
+		const formattedMessages = messages.map((message) => {
+			const {author, ...rest} = message
+			return {
+				...rest,
+				author_name: message.author.username,
+				created_at: message.created_at.toISOString(),
+				updated_at: message.updated_at.toISOString(),
+			}
+		});
 
 		return { messages: formattedMessages };
 	}
