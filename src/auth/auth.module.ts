@@ -8,17 +8,17 @@ import { RefreshTokenService } from './refresh-token.service';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.getOrThrow<string>('JWT_SECRET'),
-      })
-    }),
-    UserModule
-  ],
-  providers: [JwtStrategy, RefreshTokenService],
-  controllers: [AuthController]
+	imports: [
+		PassportModule.register({ defaultStrategy: 'jwt' }),
+		JwtModule.registerAsync({
+			inject: [ConfigService],
+			useFactory: (configService: ConfigService) => ({
+				secret: configService.getOrThrow<string>('JWT_SECRET'),
+			}),
+		}),
+		UserModule,
+	],
+	providers: [JwtStrategy, RefreshTokenService],
+	controllers: [AuthController],
 })
 export class AuthModule {}

@@ -1,4 +1,19 @@
-import {Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, Logger, Get, Param, ParseIntPipe, Delete, Patch, Query } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	HttpCode,
+	HttpStatus,
+	Post,
+	Req,
+	UseGuards,
+	Logger,
+	Get,
+	Param,
+	ParseIntPipe,
+	Delete,
+	Patch,
+	Query,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import CreateMessageDto from './dto/create-message.dto';
 import { User } from 'src/common/decorators/user.decorator';
@@ -16,46 +31,56 @@ export class MessageController {
 	constructor(private readonly messagesService: MessageService) {}
 
 	@Get('/:messageId')
-	async getMessage( 
+	async getMessage(
 		@Req() req: Request,
 		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number
+		@Param('messageId', ParseIntPipe) messageId: number,
 	) {
-		this.logger.log(`Пользователь с id: ${userId} запросил ресурс ${req.method} ${req.originalUrl} `);
+		this.logger.log(
+			`Пользователь с id: ${userId} запросил ресурс ${req.method} ${req.originalUrl} `,
+		);
 		const message = await this.messagesService.getMessage(messageId, userId);
 		return message;
 	}
 
 	@Get()
 	async getPrivateChatMessages(
-		@Req() req: Request, 
+		@Req() req: Request,
 		@User('id') userId: number,
 		@Param('chatId', ParseIntPipe) chatId: number,
-		@Query() query: GetMessagesDto
-	): Promise< MessagesResponse > {
-		this.logger.log(`User id: ${userId} fetched ${req.method} ${req.originalUrl}`)
+		@Query() query: GetMessagesDto,
+	): Promise<MessagesResponse> {
+		this.logger.log(
+			`User id: ${userId} fetched ${req.method} ${req.originalUrl}`,
+		);
 
-		const messages = await this.messagesService.getPrivateChatMessages(chatId, query);
+		const messages = await this.messagesService.getPrivateChatMessages(
+			chatId,
+			query,
+		);
 
-		const formattedMessages = messages.map(message => ({
+		const formattedMessages = messages.map((message) => ({
 			...message,
 			created_at: message.created_at.toISOString(),
 			updated_at: message.updated_at.toISOString(),
-		}))
+		}));
 
-		return { messages: formattedMessages };	
+		return { messages: formattedMessages };
 	}
-
 
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
 	async storeMessage(
-		@Body() body: CreateMessageDto, 
+		@Body() body: CreateMessageDto,
 		@Param('chatId', ParseIntPipe) chatId: number,
-		@User('id') userId: number
+		@User('id') userId: number,
 	) {
 		const { text } = body;
-		const message = await this.messagesService.storeMessage(text, userId, chatId);
+		const message = await this.messagesService.storeMessage(
+			text,
+			userId,
+			chatId,
+		);
 		return message;
 	}
 
@@ -64,15 +89,15 @@ export class MessageController {
 		@Body() body: UpdateMessageDto,
 		@User('id') userId: number,
 		@Param('messageId', ParseIntPipe) messageId: number,
-		@Param('chatId', ParseIntPipe) chatId: number
-	){
-		const  { text } = body;
+		@Param('chatId', ParseIntPipe) chatId: number,
+	) {
+		const { text } = body;
 
-		const updatedMessage = await  this.messagesService.updateMessage(
-			text, 
-			messageId, 
+		const updatedMessage = await this.messagesService.updateMessage(
+			text,
+			messageId,
 			userId,
-			chatId
+			chatId,
 		);
 
 		return updatedMessage;
@@ -81,10 +106,10 @@ export class MessageController {
 	@Delete('/:messageId')
 	async destroyMessage(
 		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number
+		@Param('messageId', ParseIntPipe) messageId: number,
 	) {
 		await this.messagesService.getMessage(messageId, userId);
-		
+
 		await this.messagesService.destroyMessage(messageId, userId);
 
 		return;

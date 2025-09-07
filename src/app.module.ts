@@ -10,18 +10,18 @@ import { ChatModule } from './chat/chat.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validate: (config) => envSchema.parse(config),
-    }),
-    MessageModule, 
-    PrismaModule, 
-    AuthModule, 
-    ChatModule, 
-    UserModule
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			validate: (config) => envSchema.parse(config),
+		}),
+		MessageModule,
+		PrismaModule,
+		AuthModule,
+		ChatModule,
+		UserModule,
+	],
+	controllers: [AppController],
+	providers: [AppService],
 })
 export class AppModule {}

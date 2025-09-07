@@ -1,6 +1,6 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty } from 'class-validator';
 
 export class CreatePrivateChatDto {
 	@IsNotEmpty()
-	user_id: number
+	user_id: number;
 }

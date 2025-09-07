@@ -10,15 +10,15 @@ export class ChatService {
 
 	private async existingUsers(userIds: number[]): Promise<void> {
 		const existingUsers = await this.prisma.user.findMany({
-			where: {id: {in: userIds}}
-		})
+			where: { id: { in: userIds } },
+		});
 
-		const existingUsersIds = existingUsers.map(user => user.id);
+		const existingUsersIds = existingUsers.map((user) => user.id);
 
-		const missingIds = userIds.filter(id => !existingUsersIds.includes(id));
+		const missingIds = userIds.filter((id) => !existingUsersIds.includes(id));
 
-		if(missingIds.length > 0) {
-			 throw new Error(`Users not found ids: ${missingIds.join(',')}`);
+		if (missingIds.length > 0) {
+			throw new Error(`Users not found ids: ${missingIds.join(',')}`);
 		}
 	}
 
@@ -41,31 +41,31 @@ export class ChatService {
 		let chat = await this.prisma.chat.findFirst({
 			where: {
 				members: {
-					every: { user_id: { in: [currentUserId, companionUserId] } }
-				}
-			}, 
-			include: { members: true }
-		})
+					every: { user_id: { in: [currentUserId, companionUserId] } },
+				},
+			},
+			include: { members: true },
+		});
 
 		if (!chat) {
 			chat = await this.createChat([currentUserId, companionUserId]);
 		}
 
-		return chat
+		return chat;
 	}
 
 	async getPrivateChats(
-		userId: number
+		userId: number,
 	): Promise<(Chat & { members: (ChatMember & { user: User })[] })[]> {
 		const chats = await this.prisma.chat.findMany({
 			where: {
 				members: {
-					some: { user_id: userId }
-				}
+					some: { user_id: userId },
+				},
 			},
 			include: {
-				members: {include: {user: true }}
-			}
+				members: { include: { user: true } },
+			},
 		});
 
 		return chats;
@@ -75,63 +75,62 @@ export class ChatService {
 		try {
 			const chat = await this.prisma.$transaction(async (tx) => {
 				const chat = await tx.chat.create({
-					data: {}
+					data: {},
 				});
-				
+
 				await this.existingUsers(userIds);
 
 				await tx.chatMember.createMany({
-					data: userIds.map(userId => ({
+					data: userIds.map((userId) => ({
 						chat_id: chat.id,
-						user_id: userId
-					}))
-				})
+						user_id: userId,
+					})),
+				});
 
 				return tx.chat.findUnique({
 					where: { id: chat.id },
 					include: {
 						members: {
 							include: {
-								user: true
-							}
-						}
-					}
-				})
-			})
+								user: true,
+							},
+						},
+					},
+				});
+			});
 
-			if(!chat) throw new Error('Failed to create chat');
+			if (!chat) throw new Error('Failed to create chat');
 
 			this.logger.log(`New chat created id: ${chat.id}`);
 
 			return chat;
 		} catch (err) {
-			throw(err);
+			throw err;
 		}
 	}
 
 	async addMembers(chatId: number, userIds: number[]) {
-		try{
+		try {
 			const chat = await this.prisma.chat.findUnique({
-				where:{
-					id: chatId
-				}
+				where: {
+					id: chatId,
+				},
 			});
 
-			if(!chat) throw new Error(`Chat not found with id: ${chatId}`)
+			if (!chat) throw new Error(`Chat not found with id: ${chatId}`);
 
-			await this.existingUsers(userIds)
+			await this.existingUsers(userIds);
 
 			await this.prisma.chatMember.createMany({
-				data: userIds.map(user_id => ({ chat_id: chatId, user_id })),
-				skipDuplicates: true
-			})
+				data: userIds.map((user_id) => ({ chat_id: chatId, user_id })),
+				skipDuplicates: true,
+			});
 
 			this.logger.log(`Members added in chat ${chatId}`);
 
-			return {success: true, addedUsers: userIds}
+			return { success: true, addedUsers: userIds };
 		} catch (err) {
-			throw(err);
+			throw err;
 		}
-		
 	}
 }

@@ -10,10 +10,9 @@ export class UserService {
 
 	constructor(private readonly prisma: PrismaService) {}
 
-
 	async findUserByEmail(email: string): Promise<User | null> {
 		const user = await this.prisma.user.findUnique({
-			where: { email }
+			where: { email },
 		});
 
 		return user;
@@ -22,7 +21,7 @@ export class UserService {
 	async getMe(userId: number): Promise<UserDto> {
 		try {
 			const user = await this.prisma.user.findUniqueOrThrow({
-				where: {id: userId}
+				where: { id: userId },
 			});
 
 			return plainToInstance(UserDto, user);
@@ -35,17 +34,17 @@ export class UserService {
 	async getUser(userId: number): Promise<UserDto> {
 		try {
 			const user = await this.prisma.user.findUnique({
-				where: { id: userId }
+				where: { id: userId },
 			});
 
 			if (!user) throw new Error(`User not found: ${userId}`);
 
-			this.logger.log(`User fetched successfully (id=${userId})`)
+			this.logger.log(`User fetched successfully (id=${userId})`);
 
-			return plainToInstance(UserDto, user)
+			return plainToInstance(UserDto, user);
 		} catch (err) {
 			throw err;
-		}	
+		}
 	}
 
 	async getUsers(): Promise<UserDto[]> {

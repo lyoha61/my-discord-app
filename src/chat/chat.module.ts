@@ -7,17 +7,17 @@ import { ConfigService } from '@nestjs/config';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 
-
 @Module({
-  imports: [MessageModule,
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET')
-      })
-    })
-  ],
-  providers: [ChatGateway, WsJwtGuard, ChatService],
-  controllers: [ChatController]
+	imports: [
+		MessageModule,
+		JwtModule.registerAsync({
+			inject: [ConfigService],
+			useFactory: (config: ConfigService) => ({
+				secret: config.get('JWT_SECRET'),
+			}),
+		}),
+	],
+	providers: [ChatGateway, WsJwtGuard, ChatService],
+	controllers: [ChatController],
 })
 export class ChatModule {}

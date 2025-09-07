@@ -1,4 +1,12 @@
-import { Controller, HttpCode, HttpStatus, Logger, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {
+	Controller,
+	HttpCode,
+	HttpStatus,
+	Logger,
+	Post,
+	UnauthorizedException,
+	UseGuards,
+} from '@nestjs/common';
 import { Body } from '@nestjs/common';
 import RegisterUserDto from './dto/register-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -25,14 +33,19 @@ export class AuthController {
 
 	constructor(
 		private prisma: PrismaService,
-		private refreshTokenService: RefreshTokenService, 
+		private refreshTokenService: RefreshTokenService,
 		private jwtService: JwtService,
 		private configService: ConfigService,
-		private readonly userService: UserService
+		private readonly userService: UserService,
 	) {
-		this.accessTokenExpires = this.configService.getOrThrow<ms.StringValue>('ACCESS_TOKEN_EXPIRES_IN');
-		this.refreshTokenExpires = this.configService.getOrThrow<ms.StringValue>('REFRESH_TOKEN_EXPIRES_IN');
-		this.REFRESH_SECRET = this.configService.getOrThrow<StringValue>('JWT_SECRET');
+		this.accessTokenExpires = this.configService.getOrThrow<ms.StringValue>(
+			'ACCESS_TOKEN_EXPIRES_IN',
+		);
+		this.refreshTokenExpires = this.configService.getOrThrow<ms.StringValue>(
+			'REFRESH_TOKEN_EXPIRES_IN',
+		);
+		this.REFRESH_SECRET =
+			this.configService.getOrThrow<StringValue>('JWT_SECRET');
 	}
 
 	private async hashPassword(password: string): Promise<string> {
@@ -41,10 +54,13 @@ export class AuthController {
 		return hashedPass;
 	}
 
-	private async isPasswordValid(password: string, hashedPass: string): Promise<boolean> {
+	private async isPasswordValid(
+		password: string,
+		hashedPass: string,
+	): Promise<boolean> {
 		const isMatch = await bcrypt.compare(password, hashedPass);
 
-		if(!isMatch) throw new UnauthorizedException('Invalid email or password');
+		if (!isMatch) throw new UnauthorizedException('Invalid email or password');
 
 		return true;
 	}
@@ -53,7 +69,7 @@ export class AuthController {
 		const payload = jwt.verify(refreshToken, this.REFRESH_SECRET) as JwtPayload;
 
 		if (!payload.sub) {
-			throw new Error("No subject (sub) in token");
+			throw new Error('No subject (sub) in token');
 		}
 
 		const userId = Number(payload.sub);
@@ -61,20 +77,23 @@ export class AuthController {
 		return userId;
 	}
 
-	private async generateToken(user: UserForToken, expiresIn: string): Promise<string> {
+	private async generateToken(
+		user: UserForToken,
+		expiresIn: string,
+	): Promise<string> {
 		const payload = { sub: user.id };
 		return this.jwtService.sign(payload, { expiresIn });
 	}
 
-	private async generateTokens(user: UserForToken): Promise<{ 
-		access_token:string; 
-		refresh_token: string 
+	private async generateTokens(user: UserForToken): Promise<{
+		access_token: string;
+		refresh_token: string;
 	}> {
-		const [ access_token, refresh_token ] = await Promise.all([
-			this.generateToken(user, this.accessTokenExpires), 
-			this.generateToken(user, this.refreshTokenExpires)
+		const [access_token, refresh_token] = await Promise.all([
+			this.generateToken(user, this.accessTokenExpires),
+			this.generateToken(user, this.refreshTokenExpires),
 		]);
-		return { access_token, refresh_token }
+		return { access_token, refresh_token };
 	}
 
 	private generateTemporaryUsername(email: string): string {
@@ -91,22 +110,22 @@ export class AuthController {
 			const username = this.generateTemporaryUsername(email);
 			const hashedPass = await this.hashPassword(password);
 
-			const { password: _, ...user } = await  this.prisma.user.create({
-				data: { username, email, password: hashedPass }
-			})
-			const tokens = await this.generateTokens(user); 
+			const { password: _, ...user } = await this.prisma.user.create({
+				data: { username, email, password: hashedPass },
+			});
+			const tokens = await this.generateTokens(user);
 
 			this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
 
 			this.logger.log(`User registered id: ${user.id}`);
 			return {
 				tokens,
-				user: user
+				user: user,
 			};
 		} catch (err) {
 			this.logger.error('Ошибка регистрации пользователя', err.stack);
 			throw err;
-		}		
+		}
 	}
 
 	@Post('/login')
@@ -116,7 +135,8 @@ export class AuthController {
 
 			const user = await this.userService.findUserByEmail(email);
 
-			if (!user) throw new UnauthorizedException(`User not found email:${email}`)
+			if (!user)
+				throw new UnauthorizedException(`User not found email:${email}`);
 
 			await this.isPasswordValid(password, user.password);
 
@@ -128,22 +148,22 @@ export class AuthController {
 			return {
 				access_token: tokens.access_token,
 				refresh_token: tokens.refresh_token,
-				expires_in: Math.floor(ms(this.accessTokenExpires) / 1000 )
-			}
-		} catch(err) {
+				expires_in: Math.floor(ms(this.accessTokenExpires) / 1000),
+			};
+		} catch (err) {
 			throw err;
 		}
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Post('/logout')
-	async logout (
-		@UserDecorator('id') userId: number
+	async logout(
+		@UserDecorator('id') userId: number,
 	): Promise<{ success: boolean }> {
 		try {
 			await this.refreshTokenService.deleteToken(userId);
 			this.logger.log(`User ${userId} logout`);
-			return { success: true }
+			return { success: true };
 		} catch (err) {
 			throw err;
 		}
@@ -153,28 +173,26 @@ export class AuthController {
 	async refreshAccessToken(
 		@Body() body: { refresh_token: string },
 	): Promise<RefreshAccessTokenResponse> {
-		
 		const refreshToken = body.refresh_token;
 		const userId = this.getUserFromToken(refreshToken);
 		console.log(userId);
 		this.logger.log(`User id: ${userId} fetched refresh token`);
 
-		if(!this.refreshTokenService.isTokenValid(userId, refreshToken))
-			throw new UnauthorizedException('Token invalid')
+		if (!this.refreshTokenService.isTokenValid(userId, refreshToken))
+			throw new UnauthorizedException('Token invalid');
 
 		const user = await this.userService.getUser(userId);
 
-		const accessToken =  await this.generateToken(user, this.accessTokenExpires)
+		const accessToken = await this.generateToken(user, this.accessTokenExpires);
 
 		this.refreshTokenService.setToken(userId, accessToken);
 
 		this.logger.log(`Success refresh access token for user id: ${userId}`);
 
-		return { 
+		return {
 			user_id: userId,
 			access_token: accessToken,
-			expires_in: Math.floor(ms(this.accessTokenExpires) / 1000)
-		}
-		
+			expires_in: Math.floor(ms(this.accessTokenExpires) / 1000),
+		};
 	}
 }
