@@ -1,26 +1,40 @@
 import { useEffect, useRef } from "react";
-import type { SocketAuth } from "shared/types/auth";
 import {Socket, io} from 'socket.io-client';
-import { getAccessToken } from "src/services/authService";
+import { getAccessToken, refreshAccessToken } from "src/services/authService";
+import { EVENTS } from 'shared/events';
 
 export const useSocket = () => {
 	const socketRef = useRef<Socket | null>(null);
+	const pendingMessageRef = useRef<unknown>(null);
 
+	const sendMessage = (payload: unknown) => {
+		if (!socketRef.current) return;
+
+		pendingMessageRef.current = payload;
+		socketRef.current.emit(EVENTS.MESSAGE, payload);
+	}
+	
 	useEffect(() => {
-		const accesToken = getAccessToken();
-
-		if (!accesToken) throw new Error('Access token is missing');
-
-		const authData: SocketAuth = { access_token: accesToken };
-
 		socketRef.current = io('http://localhost:3000', {
-			auth: authData
+			auth: (cb) => cb({ access_token: getAccessToken() })
 		});
+		
+		socketRef.current.on(EVENTS.TOKEN_EXPIRED, async () => {
+
+			await refreshAccessToken();
+			socketRef.current?.disconnect();
+			socketRef.current?.connect();
+
+			if (pendingMessageRef.current) {
+				socketRef.current?.emit(EVENTS.MESSAGE, pendingMessageRef.current);
+				pendingMessageRef.current = null;
+			}
+		})
 
 		return () => {
 			socketRef.current?.disconnect();
 		}
 	}, []);
 
-	return socketRef.current;
+	return {socket: socketRef.current, sendMessage};
 }

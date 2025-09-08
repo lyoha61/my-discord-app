@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
+import { EVENTS } from 'shared/events';
 import { Socket } from 'socket.io';
 
 @Injectable()
@@ -27,6 +28,7 @@ export class WsJwtGuard implements CanActivate {
 			this.logger.error(
 				`Client ${client.id} send invalid token: ${err.message}`,
 			);
+			client.emit(EVENTS.TOKEN_EXPIRED);
 			throw new WsException('Invalid Token');
 		}
 	}

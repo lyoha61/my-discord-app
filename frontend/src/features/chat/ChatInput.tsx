@@ -5,25 +5,25 @@ import type { ClientMessagePayload } from "shared/types/message";
 
 interface ChatInputProps {
 	socket: Socket | null;
+	sendMessage: (payload: unknown) => void;
 	chatId: number | null;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({socket, chatId}) => {
+export const ChatInput: React.FC<ChatInputProps> = ({socket, sendMessage, chatId}) => {
 
 	const [inputMessage, setInputMessage] = useState('');
 
 	if (!socket || !chatId) return null;
 
-	const sendMessage = () => {
+	const handleSend = () => {
 		if(!inputMessage.trim() || !socket || !chatId) return;
 
 		const payload: ClientMessagePayload = {
 			text: inputMessage,
 			chat_id: chatId
 		}
-
-		socket.emit('message', payload);
-		setInputMessage('')
+		sendMessage(payload);
+		setInputMessage('');
 	}
 
 	return (
@@ -34,10 +34,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({socket, chatId}) => {
 				value={inputMessage}
 				placeholder="Введите сообщение..." 
 				onChange={(e) => setInputMessage(e.target.value)}
-				onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+				onKeyDown={(e) => e.key === 'Enter' && handleSend()}
 			/>
 			<button 
-				onClick={sendMessage}
+				onClick={handleSend}
 				className="ml-3 px-2 transition font-medium cursor-pointer"
 			>
 				<img className="h-6" src={PaperIcon} alt="" />

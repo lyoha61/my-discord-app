@@ -38,7 +38,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 				</div>
 
 				{/* Message text */}
-				<div className={`text-sm px-2 py-2 rounded-lg ${
+				<div className={`text-sm px-3 py-2 rounded-lg ${
 					isCurrentUser ? 'bg-[#4A90E2]' : 'bg-[#2A2A2A]'
 				}`}>
 					{msg.text}

@@ -12,7 +12,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
 	const [messages, setMessages] = useState<ClientMessage[]>([]);
 	
-	const socket = useSocket();
+	const {socket, sendMessage} = useSocket();
 
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -88,7 +88,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 				<div ref={messagesEndRef}></div>
 			</div>
 
-			<ChatInput socket={socket} chatId={chatId}/>
+			<ChatInput socket={socket} sendMessage={sendMessage} chatId={chatId}/>
 		</div>
 	)
 
