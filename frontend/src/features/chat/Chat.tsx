@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../../hooks/useSocket"
-import type { ClientMessage, MessageEvent } from "shared/types/message";
+import type { ClientMessage, MessageNewEvent, MessageUpdateEvent } from "shared/types/message";
 import { deleteMessage, getMessages } from "../../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
 import { AnimatePresence } from "framer-motion";
 import { formatDate } from "src/utils/formatDate";
 import { MessageItem } from "./MessageItem";
 import { ChatInput } from "./ChatInput";
+import { EVENTS } from "shared/events";
 
 const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
 	const [messages, setMessages] = useState<ClientMessage[]>([]);
 	
-	const {socket, sendMessage} = useSocket();
+	const { socket, sendMessage, updateMessage } = useSocket();
 
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -34,17 +35,25 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 		
 		if(!socket) return;
 		
-		socket.on('message', (message: MessageEvent) => {
+		socket.on(EVENTS.MESSAGE_NEW, (message: MessageNewEvent) => {
 			setMessages(prev => [...prev, message])
 		});
 
+		socket.on(EVENTS.MESSAGE_UPDATE, (updatedMsg: MessageUpdateEvent) => {
+			setMessages(prev => 
+				prev.map(msg => 
+					msg.id === updatedMsg.id ? {...msg, ...updatedMsg} : msg
+				)
+			)
+		})
+
 		return () => {
-			socket.off('message');
+			socket.off(EVENTS.MESSAGE_NEW);
 		}
 	}, [socket, chatId]);
 
 	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({behavior: 'smooth'})
+		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
 	}, [messages]);
 
 	if (!currentUserId) {
@@ -80,6 +89,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 									msg={msg} 
 									currentUserId={currentUserId} 
 									onDelete={handleDelete}
+									updateMessage={updateMessage}
 								/>
 							</div>
 						);

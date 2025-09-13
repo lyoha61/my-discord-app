@@ -1,8 +1,8 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Message, User } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { GetMessagesDto } from './dto/get-messages.dto';
-import { MessageWithAuthor } from './types/message';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Message } from "@prisma/client";
+import { PrismaService } from "src/prisma/prisma.service";
+import { GetMessagesDto } from "./dto/get-messages.dto";
+import { MessageWithAuthor } from "./types/message";
 
 @Injectable()
 export class MessageService {
@@ -42,24 +42,20 @@ export class MessageService {
 		chatId: number,
 		query: GetMessagesDto,
 	): Promise<MessageWithAuthor[]> {
-		const { sort = 'asc' } = query;
-		try {
-			const messages = await this.prisma.message.findMany({
-				where: {
-					chat_id: chatId,
-				},
-				include: {
-					author: true
-				},
-				orderBy: { created_at: sort },
-			});
+		const { sort = "asc" } = query;
+		const messages = await this.prisma.message.findMany({
+			where: {
+				chat_id: chatId,
+			},
+			include: {
+				author: true,
+			},
+			orderBy: { created_at: sort },
+		});
 
-			if (messages.length === 0) return [];
+		if (messages.length === 0) return [];
 
-			return messages;
-		} catch (err) {
-			throw err;
-		}
+		return messages;
 	}
 
 	async storeMessage(
@@ -69,7 +65,8 @@ export class MessageService {
 	): Promise<MessageWithAuthor> {
 		try {
 			if (!text || !userId || !chatId)
-				throw new Error('Invalid input data for saving message');
+				throw new Error("Invalid input data for saving message");
+
 			const message = await this.prisma.message.create({
 				data: {
 					text: text,
@@ -85,18 +82,25 @@ export class MessageService {
 					},
 				},
 				include: {
-					author: true
-				}
+					author: true,
+				},
 			});
 
-			this.logger.log(`Message saved in DB id: ${message.id}`);
+			this.logger.log(
+				JSON.stringify({
+					event: "Message saved",
+					messageId: message.id,
+					chatId,
+					userId,
+				}),
+			);
 
 			return message;
 		} catch (err) {
 			if (err instanceof Error) {
 				this.logger.error(err.message);
 			} else {
-				this.logger.error('Error saving message');
+				this.logger.error("Error saving message");
 			}
 			throw err;
 		}
@@ -130,7 +134,7 @@ export class MessageService {
 
 			return updatedMessage;
 		} catch (err) {
-			this.logger.error(`Errro during update message with id: ${messageId}`);
+			this.logger.error(`Error during update message with id: ${messageId}`);
 			throw err;
 		}
 	}
@@ -144,15 +148,15 @@ export class MessageService {
 				},
 			});
 			if (!result)
-				throw new NotFoundException('Сообщение не найдено или вы не автор');
+				throw new NotFoundException("Message not found or access denied");
 
-			this.logger.log(`Сообщение успешно удалено id: ${messageId}`);
+			this.logger.log("Message deleted id: ${messageId}");
 			return {
-				message: 'Сообщение успешно удалено',
+				message: "Message deleted",
 				message_id: messageId,
 			};
 		} catch (err) {
-			this.logger.error(`Ошибка при удалении сообщения id: ${messageId}`);
+			this.logger.error(`Failed delete message id: ${messageId}`);
 			throw err;
 		}
 	}

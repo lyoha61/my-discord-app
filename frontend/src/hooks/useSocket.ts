@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import {Socket, io} from 'socket.io-client';
 import { getAccessToken, refreshAccessToken } from "src/services/authService";
 import { EVENTS } from 'shared/events';
+import type { ClientMessagePayload } from "shared/types/message";
 
 export const useSocket = () => {
 	const socketRef = useRef<Socket | null>(null);
@@ -11,7 +12,13 @@ export const useSocket = () => {
 		if (!socketRef.current) return;
 
 		pendingMessageRef.current = payload;
-		socketRef.current.emit(EVENTS.MESSAGE, payload);
+		socketRef.current.emit(EVENTS.MESSAGE_NEW, payload);
+	}
+
+	const updateMessage = (payload: ClientMessagePayload) => {
+		if (!socketRef.current) return;
+
+		socketRef.current.emit(EVENTS.MESSAGE_UPDATE, payload)
 	}
 	
 	useEffect(() => {
@@ -26,7 +33,7 @@ export const useSocket = () => {
 			socketRef.current?.connect();
 
 			if (pendingMessageRef.current) {
-				socketRef.current?.emit(EVENTS.MESSAGE, pendingMessageRef.current);
+				socketRef.current?.emit(EVENTS.MESSAGE_NEW, pendingMessageRef.current);
 				pendingMessageRef.current = null;
 			}
 		})
@@ -36,5 +43,5 @@ export const useSocket = () => {
 		}
 	}, []);
 
-	return {socket: socketRef.current, sendMessage};
+	return {socket: socketRef.current, sendMessage, updateMessage};
 }

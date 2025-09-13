@@ -1,21 +1,48 @@
-import type { ClientMessage } from "shared/types/message"
+import type { ClientMessage, ClientMessagePayload } from "shared/types/message"
 import { AnimatePresence, motion} from "framer-motion";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface MessageItemProps {
 	msg: ClientMessage;
 	currentUserId: number;
-	onDelete: (chatId: number, messageId: number) => void
+	onDelete: (chatId: number, messageId: number) => void;
+	updateMessage: (payload: ClientMessagePayload) => void;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
 	msg, 
 	currentUserId, 
-	onDelete
+	onDelete,
+	updateMessage,
 }) => {
 	const isCurrentUser = msg.author_id === currentUserId;
 	const time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 	const [hovered, setHovered] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [editText, setEditText] = useState(msg.text);
+	const inputRef = useRef<HTMLTextAreaElement>(null);
+
+	useEffect(() => {
+		if (isEditing) inputRef.current?.focus();
+	}, [isEditing]);
+
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.style.height = 'auto';
+			inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+		}
+	}, [editText])
+
+	const handleEditSubmit = async () => {
+		if (editText.trim() && editText !== msg.text) {
+			updateMessage({
+				text: editText.trim(),
+				message_id: msg.id,
+				chat_id: msg.chat_id,
+			})
+		}
+		setIsEditing(false);
+	}
 
 	return (
 		<div 
@@ -37,11 +64,22 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 					{isCurrentUser ? '' : `${msg.author_name}`}
 				</div>
 
-				{/* Message text */}
-				<div className={`text-sm px-3 py-2 rounded-lg ${
+				{/* Message text / Input */}
+				<div className={`text-sm px-3 py-2 rounded-lg break-all ${
 					isCurrentUser ? 'bg-[#4A90E2]' : 'bg-[#2A2A2A]'
 				}`}>
-					{msg.text}
+					{isEditing ?(
+						<textarea
+							ref={inputRef}
+							value={editText}
+							onChange={e => setEditText(e.target.value)}
+							rows={1}
+							onKeyDown={e => e.key === 'Enter' && handleEditSubmit()}
+							className="outline-none resize-none overflow-hidden"
+						/>
+					) : (
+						msg.text
+					)}
 				</div>
 
 				{/* Message Time */}
@@ -64,6 +102,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 					>
 						<button 
 							className="border-r pr-2 border-[#0B0B0B] cursor-pointer text-[#D1D5DB]"
+							onClick={() => setIsEditing(true)}
 						>
 							Изменить
 						</button>

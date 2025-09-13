@@ -13,28 +13,28 @@ import {
 	Delete,
 	Patch,
 	Query,
-} from '@nestjs/common';
-import type { Request } from 'express';
-import CreateMessageDto from './dto/create-message.dto';
-import { User } from 'src/common/decorators/user.decorator';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import UpdateMessageDto from './dto/update-message.dto';
-import { MessageService } from './message.service';
-import { MessagesResponse } from 'shared/types/message';
-import { GetMessagesDto } from './dto/get-messages.dto';
+} from "@nestjs/common";
+import type { Request } from "express";
+import CreateMessageDto from "./dto/create-message.dto";
+import { User } from "src/common/decorators/user.decorator";
+import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import UpdateMessageDto from "./dto/update-message.dto";
+import { MessageService } from "./message.service";
+import { GetMessagesDto } from "./dto/get-messages.dto";
+import { MessagesResponseRest } from "./types/message";
 
-@Controller('chats/:chatId/messages')
+@Controller("chats/:chatId/messages")
 @UseGuards(JwtAuthGuard)
 export class MessageController {
 	private readonly logger = new Logger(MessageController.name);
 
 	constructor(private readonly messagesService: MessageService) {}
 
-	@Get('/:messageId')
+	@Get("/:messageId")
 	async getMessage(
 		@Req() req: Request,
-		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number,
+		@User("id") userId: number,
+		@Param("messageId", ParseIntPipe) messageId: number,
 	) {
 		this.logger.log(
 			`Пользователь с id: ${userId} запросил ресурс ${req.method} ${req.originalUrl} `,
@@ -46,10 +46,10 @@ export class MessageController {
 	@Get()
 	async getPrivateChatMessages(
 		@Req() req: Request,
-		@User('id') userId: number,
-		@Param('chatId', ParseIntPipe) chatId: number,
+		@User("id") userId: number,
+		@Param("chatId", ParseIntPipe) chatId: number,
 		@Query() query: GetMessagesDto,
-	): Promise<MessagesResponse> {
+	): Promise<MessagesResponseRest> {
 		this.logger.log(
 			`User id: ${userId} fetched ${req.method} ${req.originalUrl}`,
 		);
@@ -60,13 +60,13 @@ export class MessageController {
 		);
 
 		const formattedMessages = messages.map((message) => {
-			const {author, ...rest} = message
+			const { author, ...rest } = message;
 			return {
 				...rest,
-				author_name: message.author.username,
+				author_name: author.username,
 				created_at: message.created_at.toISOString(),
 				updated_at: message.updated_at.toISOString(),
-			}
+			};
 		});
 
 		return { messages: formattedMessages };
@@ -76,8 +76,8 @@ export class MessageController {
 	@HttpCode(HttpStatus.CREATED)
 	async storeMessage(
 		@Body() body: CreateMessageDto,
-		@Param('chatId', ParseIntPipe) chatId: number,
-		@User('id') userId: number,
+		@Param("chatId", ParseIntPipe) chatId: number,
+		@User("id") userId: number,
 	) {
 		const { text } = body;
 		const message = await this.messagesService.storeMessage(
@@ -88,12 +88,12 @@ export class MessageController {
 		return message;
 	}
 
-	@Patch('/:messageId')
+	@Patch("/:messageId")
 	async updateMessage(
 		@Body() body: UpdateMessageDto,
-		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number,
-		@Param('chatId', ParseIntPipe) chatId: number,
+		@User("id") userId: number,
+		@Param("messageId", ParseIntPipe) messageId: number,
+		@Param("chatId", ParseIntPipe) chatId: number,
 	) {
 		const { text } = body;
 
@@ -107,10 +107,10 @@ export class MessageController {
 		return updatedMessage;
 	}
 
-	@Delete('/:messageId')
+	@Delete("/:messageId")
 	async destroyMessage(
-		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number,
+		@User("id") userId: number,
+		@Param("messageId", ParseIntPipe) messageId: number,
 	) {
 		await this.messagesService.getMessage(messageId, userId);
 

@@ -175,7 +175,6 @@ export class AuthController {
 	): Promise<RefreshAccessTokenResponse> {
 		const refreshToken = body.refresh_token;
 		const userId = this.getUserFromToken(refreshToken);
-		console.log(userId);
 		this.logger.log(`User id: ${userId} fetched refresh token`);
 
 		if (!this.refreshTokenService.isTokenValid(userId, refreshToken))

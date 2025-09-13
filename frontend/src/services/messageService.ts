@@ -19,6 +19,27 @@ export const getMessages = async (
 	return await res.json();
 }
 
+export const updateMessage = async(
+	chatId: number, 
+	messageId: number, 
+	text: string
+): Promise<void> => {
+
+	const res = await fetch(`chats/${chatId}/messages/${messageId}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({text})
+	});
+	
+	if (!res.ok) {
+		const data = await res.json();
+		console.error(data)
+		throw new Error(data);
+	}
+}
+
 export const deleteMessage = async (chatId: number, messageId: number): Promise<void> => {
 	const res = await fetch(`chats/${chatId}/messages/${messageId}`, {
 		method: "DELETE",

@@ -14,7 +14,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
 	catch(exception: unknown, host: ArgumentsHost) {
 		if (exception instanceof Error) {
-			this.logger.error(exception.message);
+			this.logger.error(exception.message, exception.message);
 		} else {
 			this.logger.error(exception);
 		}
