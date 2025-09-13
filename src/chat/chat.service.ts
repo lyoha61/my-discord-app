@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Chat, ChatMember, User } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { Chat, ChatMember, User } from "@prisma/client";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class ChatService {
@@ -18,23 +18,19 @@ export class ChatService {
 		const missingIds = userIds.filter((id) => !existingUsersIds.includes(id));
 
 		if (missingIds.length > 0) {
-			throw new Error(`Users not found ids: ${missingIds.join(',')}`);
+			throw new Error(`Users not found ids: ${missingIds.join(",")}`);
 		}
 	}
 
 	async getChat(chatId: number) {
-		try {
-			const chat = this.prisma.chat.findUnique({
-				where: { id: chatId },
-				include: { members: true, messages: true },
-			});
+		const chat = await this.prisma.chat.findUnique({
+			where: { id: chatId },
+			include: { members: true, messages: true },
+		});
 
-			if (!chat) throw new Error(`Chat not found: ${chatId}`);
+		if (!chat) throw new Error(`Chat not found: ${chatId}`);
 
-			return chat;
-		} catch (err) {
-			throw err;
-		}
+		return chat;
 	}
 
 	async getOrCreatePrivateChat(currentUserId: number, companionUserId: number) {
@@ -71,66 +67,69 @@ export class ChatService {
 		return chats;
 	}
 
-	async createChat(userIds: number[]) {
-		try {
-			const chat = await this.prisma.$transaction(async (tx) => {
-				const chat = await tx.chat.create({
-					data: {},
-				});
-
-				await this.existingUsers(userIds);
-
-				await tx.chatMember.createMany({
-					data: userIds.map((userId) => ({
-						chat_id: chat.id,
-						user_id: userId,
-					})),
-				});
-
-				return tx.chat.findUnique({
-					where: { id: chat.id },
-					include: {
-						members: {
-							include: {
-								user: true,
-							},
-						},
-					},
-				});
-			});
-
-			if (!chat) throw new Error('Failed to create chat');
-
-			this.logger.log(`New chat created id: ${chat.id}`);
-
-			return chat;
-		} catch (err) {
-			throw err;
-		}
+	async getPrivateChatMembers(chatId: number): Promise<User[] | null> {
+		const chatMembers = await this.prisma.chatMember.findMany({
+			where: { chat_id: chatId },
+			include: {
+				user: true,
+			},
+		});
+		const members = chatMembers.map((chatMember) => chatMember.user);
+		return members ? members : null;
 	}
 
-	async addMembers(chatId: number, userIds: number[]) {
-		try {
-			const chat = await this.prisma.chat.findUnique({
-				where: {
-					id: chatId,
-				},
+	async createChat(userIds: number[]) {
+		const chat = await this.prisma.$transaction(async (tx) => {
+			const chat = await tx.chat.create({
+				data: {},
 			});
-
-			if (!chat) throw new Error(`Chat not found with id: ${chatId}`);
 
 			await this.existingUsers(userIds);
 
-			await this.prisma.chatMember.createMany({
-				data: userIds.map((user_id) => ({ chat_id: chatId, user_id })),
-				skipDuplicates: true,
+			await tx.chatMember.createMany({
+				data: userIds.map((userId) => ({
+					chat_id: chat.id,
+					user_id: userId,
+				})),
 			});
 
-			this.logger.log(`Members added in chat ${chatId}`);
+			return tx.chat.findUnique({
+				where: { id: chat.id },
+				include: {
+					members: {
+						include: {
+							user: true,
+						},
+					},
+				},
+			});
+		});
 
-			return { success: true, addedUsers: userIds };
-		} catch (err) {
-			throw err;
-		}
+		if (!chat) throw new Error("Failed to create chat");
+
+		this.logger.log(`New chat created id: ${chat.id}`);
+
+		return chat;
+	}
+
+	async addMembers(chatId: number, userIds: number[]) {
+		const chat = await this.prisma.chat.findUnique({
+			where: {
+				id: chatId,
+			},
+		});
+
+		if (!chat) throw new Error(`Chat not found with id: ${chatId}`);
+
+		await this.existingUsers(userIds);
+
+		await this.prisma.chatMember.createMany({
+			data: userIds.map((user_id) => ({ chat_id: chatId, user_id })),
+			skipDuplicates: true,
+		});
+
+		this.logger.log(`Members added in chat ${chatId}`);
+
+		return { success: true, addedUsers: userIds };
 	}
 }

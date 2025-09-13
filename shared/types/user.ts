@@ -8,7 +8,7 @@ export interface User {
 }
 
 export interface UserResponse {
-	user: User
+	user: User;
 }
 
 export interface UsersResponse {

@@ -2,7 +2,7 @@ export interface User {
 	id: number;
 	username: string;
 	name?: string;
-	email: string;  
+	email: string;
 }
 
 export interface AccessTokenResponse {
@@ -26,4 +26,3 @@ export interface RegisterRes {
 export interface SocketAuth {
 	access_token: string;
 }
-

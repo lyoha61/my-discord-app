@@ -1,4 +1,5 @@
 import type { ChatResponse, PrivateChatsResponse } from "shared/types/chat";
+import type { UsersResponse } from "shared/types/user";
 
 export const getAvailableChats = async (): Promise<PrivateChatsResponse> => {
 	const res = await fetch('chats');
@@ -25,4 +26,20 @@ export const getOrCreatePrivateChat = async (userId: number): Promise<ChatRespon
 	const data = await res.json();
 
 	return data
+}
+
+export const getMembersPrivateChat = async (
+	chatId: number, 
+): Promise<UsersResponse> => {
+	const res = await fetch(`chats/${chatId}/members/`);
+
+	if (!res.ok) {
+		const data = await res.json()
+		console.error(data);
+		throw new Error(data);
+	}
+
+	const data = await res.json();
+
+	return data;
 }

@@ -8,6 +8,7 @@ import { formatDate } from "src/utils/formatDate";
 import { MessageItem } from "./MessageItem";
 import { ChatInput } from "./ChatInput";
 import { EVENTS } from "shared/events";
+import { ChatHeader } from "./ChatHeader";
 
 const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
@@ -57,6 +58,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	}, [messages]);
 
 	if (!currentUserId) {
+		// TODO: перекидывать на страницу 401
 		return <div>Пожалуйста, войдите, чтобы открыть чат</div>
 	}
 
@@ -65,10 +67,13 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 		setMessages(prev => prev.filter(m => m.id !== messageId));
 	}
 	
+	if (!chatId) return; 
+
 	return (
-		<div className="flex flex-col h-full w-full max-w-2xl bg-[#0B0B0B] text-white  shadow-lg">
+		<div className="flex flex-col h-full w-full  text-white  shadow-lg">
+			<ChatHeader chatId={chatId}/>
 			{/* Messages */}
-			<div className="flex-1 flex flex-col p-4 overflow-auto scrollbar-hidden">
+			<div className="flex-1 flex flex-col p-4 bg-[#0B0B0B] overflow-auto scrollbar-hidden">
 				<div className="mt-auto"></div>
 				<AnimatePresence initial={false}>
 					{messages.map((msg) => {
