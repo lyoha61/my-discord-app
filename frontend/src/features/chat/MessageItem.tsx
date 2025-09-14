@@ -1,22 +1,22 @@
-import type { ClientMessage, ClientMessagePayload } from "shared/types/message"
+import type { ClientMessage } from "shared/types/message"
 import { AnimatePresence, motion} from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useSocketContext } from "src/context/SocketContext";
 
 interface MessageItemProps {
 	msg: ClientMessage;
 	currentUserId: number;
 	onDelete: (chatId: number, messageId: number) => void;
-	updateMessage: (payload: ClientMessagePayload) => void;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
 	msg, 
 	currentUserId, 
 	onDelete,
-	updateMessage,
 }) => {
 	const isCurrentUser = msg.author_id === currentUserId;
 	const time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+	const { updateMessage } = useSocketContext();
 	const [hovered, setHovered] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editText, setEditText] = useState(msg.text);

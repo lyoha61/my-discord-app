@@ -1,22 +1,19 @@
 import { useState } from "react";
 import PaperIcon from "../../assets/icons/paper-plane.png";
-import type { Socket } from "socket.io-client";
 import type { ClientMessagePayload } from "shared/types/message";
+import { useSocketContext } from "src/context/SocketContext";
 
 interface ChatInputProps {
-	socket: Socket | null;
-	sendMessage: (payload: unknown) => void;
 	chatId: number | null;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({socket, sendMessage, chatId}) => {
-
+export const ChatInput: React.FC<ChatInputProps> = ({chatId}) => {
+	const { chatSocket, sendMessage } = useSocketContext();
 	const [inputMessage, setInputMessage] = useState('');
 
-	if (!socket || !chatId) return null;
-
+	console.log(chatSocket);
 	const handleSend = () => {
-		if(!inputMessage.trim() || !socket || !chatId) return;
+		if(!inputMessage.trim() || !chatSocket || !chatId) return;
 
 		const payload: ClientMessagePayload = {
 			text: inputMessage,

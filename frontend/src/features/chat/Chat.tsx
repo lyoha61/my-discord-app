@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSocket } from "../../hooks/useSocket"
+import { useSocketContext } from "../../context/SocketContext";
 import type { ClientMessage, MessageNewEvent, MessageUpdateEvent } from "shared/types/message";
 import { deleteMessage, getMessages } from "../../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
@@ -14,7 +14,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
 	const [messages, setMessages] = useState<ClientMessage[]>([]);
 	
-	const { socket, sendMessage, updateMessage } = useSocket();
+	const { chatSocket } = useSocketContext();
 
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -34,13 +34,13 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 
 		fetchMessages();
 		
-		if(!socket) return;
+		if(!chatSocket) return;
 		
-		socket.on(EVENTS.MESSAGE_NEW, (message: MessageNewEvent) => {
+		chatSocket.on(EVENTS.MESSAGE_NEW, (message: MessageNewEvent) => {
 			setMessages(prev => [...prev, message])
 		});
 
-		socket.on(EVENTS.MESSAGE_UPDATE, (updatedMsg: MessageUpdateEvent) => {
+		chatSocket.on(EVENTS.MESSAGE_UPDATE, (updatedMsg: MessageUpdateEvent) => {
 			setMessages(prev => 
 				prev.map(msg => 
 					msg.id === updatedMsg.id ? {...msg, ...updatedMsg} : msg
@@ -49,9 +49,9 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 		})
 
 		return () => {
-			socket.off(EVENTS.MESSAGE_NEW);
+			chatSocket.off(EVENTS.MESSAGE_NEW);
 		}
-	}, [socket, chatId]);
+	}, [chatSocket, chatId]);
 
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -94,7 +94,6 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 									msg={msg} 
 									currentUserId={currentUserId} 
 									onDelete={handleDelete}
-									updateMessage={updateMessage}
 								/>
 							</div>
 						);
@@ -103,7 +102,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 				<div ref={messagesEndRef}></div>
 			</div>
 
-			<ChatInput socket={socket} sendMessage={sendMessage} chatId={chatId}/>
+			<ChatInput chatId={chatId}/>
 		</div>
 	)
 
