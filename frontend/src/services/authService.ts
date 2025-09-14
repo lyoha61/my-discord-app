@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
-let refreshTimeout: NodeJS.Timeout | null = null;
+let refreshTimeout: number | null = null;
 
 export const saveTokens = (data: TokensResponse): void => {
 	accessToken = data.access_token;
@@ -15,7 +15,10 @@ export const saveTokens = (data: TokensResponse): void => {
 	};
 
 	if(refreshTimeout) clearTimeout(refreshTimeout);
-	refreshTimeout = setTimeout(refreshAccessToken, (data.expires_in - 30 ) * 1000);
+	refreshTimeout = window.setTimeout(
+		refreshAccessToken,
+		(data.expires_in - 30) * 1000
+	);
 }
 
 export const getAccessToken = (): string | null => {

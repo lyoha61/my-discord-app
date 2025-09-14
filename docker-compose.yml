@@ -5,11 +5,18 @@ services:
     ports: 
       - "3000:3000"
     volumes:
-      - .:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - db
       - redis_db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: my_discord_frontend
+    ports: 
+      - "80:80"
   db: 
     image: postgres:16-alpine
     container_name: postgres

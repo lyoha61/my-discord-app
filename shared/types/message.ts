@@ -1,4 +1,11 @@
-import { Message } from "@prisma/client";
+export interface Message {
+	id: number;
+	text: string;
+	updated_at: string;
+	created_at: string;
+	author_id: number;
+	chat_id: number;
+}
 
 export type ClientMessageBase = Omit<Message, "created_at" | "updated_at"> & {
 	created_at: string;
