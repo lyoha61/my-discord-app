@@ -4,18 +4,27 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 } from "@nestjs/websockets";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { MessageService } from "src/message/message.service";
 import { WsJwtGuard } from "./guards/ws-jwt.guard";
-import type { ClientMessagePayload } from "shared/types/message";
+import type {
+	ClientMessagePayload,
+	ClientUpdateMessagePayload,
+} from "shared/types/message";
 import { SocketAuth } from "shared/types/auth";
 import { JwtService } from "@nestjs/jwt";
-import { EVENTS } from "shared/events";
+import { EVENTS, USER_STATUS } from "shared/events";
 import type { ChatSocket } from "./types/socket";
 import {
 	mapMessageToClient,
 	mapUpdatedMessageToClient,
 } from "shared/utils/messageMapper";
+
+interface JwtPayload {
+	sub: number;
+	iat?: number;
+	exp?: number;
+}
 
 @WebSocketGateway({
 	cors: {
@@ -27,6 +36,7 @@ export class ChatGateway {
 	server: Server;
 
 	private readonly logger = new Logger(ChatGateway.name);
+	private onlineUsers = new Map<number, string>();
 
 	constructor(
 		private readonly messageService: MessageService,
@@ -37,7 +47,7 @@ export class ChatGateway {
 		this.logger.log("WebSocket Server Initialized");
 	}
 
-	handleConnection(client: Socket) {
+	handleConnection(client: ChatSocket) {
 		const authData = client.handshake.auth as SocketAuth;
 		if (!authData.access_token) {
 			client.disconnect(true);
@@ -46,8 +56,19 @@ export class ChatGateway {
 		}
 
 		try {
-			this.jwtService.verify(authData.access_token);
+			const payload = this.jwtService.verify<JwtPayload>(authData.access_token);
+			client.data.user = { id: payload.sub };
+			this.onlineUsers.set(payload.sub, client.id);
+
 			this.logger.log(`Client connected: ${client.id}`);
+
+			this.server.emit(EVENTS.USER_STATUS_CHANGED, {
+				userId: payload.sub,
+				status: USER_STATUS.ONLINE,
+			});
+
+			const onlineUsersIds = Array.from(this.onlineUsers.keys());
+			client.emit(EVENTS.ONLINE_USER_LIST, onlineUsersIds);
 		} catch (err: unknown) {
 			client.disconnect();
 			if (err instanceof Error) {
@@ -60,6 +81,20 @@ export class ChatGateway {
 				);
 			}
 		}
+	}
+
+	handleDisconnect(client: ChatSocket) {
+		if (!client.data.user) return;
+
+		const userId = client.data.user.id;
+		this.onlineUsers.delete(userId);
+
+		this.logger.log(`Client disconnected ${client.id}`);
+
+		this.server.emit(EVENTS.USER_STATUS_CHANGED, {
+			userId,
+			status: USER_STATUS.OFFLINE,
+		});
 	}
 
 	@UseGuards(WsJwtGuard)
@@ -91,7 +126,7 @@ export class ChatGateway {
 	@SubscribeMessage(EVENTS.MESSAGE_UPDATE)
 	async handleUpdateMessage(
 		client: ChatSocket,
-		payload: ClientMessagePayload,
+		payload: ClientUpdateMessagePayload,
 	): Promise<void> {
 		const updatedMsg = await this.messageService.updateMessage(
 			payload.text,

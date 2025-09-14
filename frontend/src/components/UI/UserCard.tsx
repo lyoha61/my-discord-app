@@ -1,12 +1,12 @@
 import { motion } from "framer-motion"
 import type { MemberPrivateChat } from "shared/types/chat"
+import { useSocketContext } from "src/context/SocketContext";
 
 interface UserCardProps {
 	member: MemberPrivateChat;
 	variant?: "list" | "header";
 	avatar?: string;
 	additionalText?: string;
-	isOnline?: boolean;
 	isSelected?: boolean;
 	onClick: (userId: number) => void;
 }
@@ -16,10 +16,11 @@ export const UserCard: React.FC<UserCardProps> = ({
 	variant,
 	avatar,
 	additionalText,
-	isOnline,
 	isSelected,
 	onClick
 }) => {
+
+	const { onlineUsers } = useSocketContext();
 
 	const isHeader = variant === "header";
 
@@ -53,10 +54,13 @@ export const UserCard: React.FC<UserCardProps> = ({
 				/>
 			}
 			
-			<div className="flex items-center justify-center">
+			<div className="relative flex items-center justify-center">
 				<div className="flex items-center justify-center  w-12 h-12 rounded-full bg-gray-400">
 					{avatar ? <img /> : "AB"}
 				</div>
+				<div className={`absolute border-2 border-[#1A1A1A] right-0 bottom-0 rounded-full w-3.5 h-3.5 ${
+					onlineUsers.includes(member.id) ? 'bg-[#5CB85C]' : 'bg-[#6B7280]'
+				}`}></div>
 			</div>
 
 			<div className="block flex flex-col text-sm w-full gap-0.5">

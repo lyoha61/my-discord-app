@@ -23,6 +23,9 @@ export interface MessagesResponse {
 
 export interface ClientMessagePayload {
 	text: string;
-	message_id: number;
 	chat_id: number;
+}
+
+export interface ClientUpdateMessagePayload extends ClientMessagePayload {
+	message_id: number;
 }

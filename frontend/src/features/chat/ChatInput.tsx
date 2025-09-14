@@ -11,7 +11,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({chatId}) => {
 	const { chatSocket, sendMessage } = useSocketContext();
 	const [inputMessage, setInputMessage] = useState('');
 
-	console.log(chatSocket);
 	const handleSend = () => {
 		if(!inputMessage.trim() || !chatSocket || !chatId) return;
 

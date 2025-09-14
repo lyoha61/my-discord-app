@@ -4,6 +4,7 @@ import type { ClientMessagePayload, ClientUpdateMessagePayload } from "shared/ty
 
 export type SocketContextValue = {
 	chatSocket: Socket | null;
+	onlineUsers: number[];
 	sendMessage: (payload: ClientMessagePayload) => void;
 	updateMessage: (payload: ClientUpdateMessagePayload) => void;
 }

@@ -1,7 +1,7 @@
 import { DefaultEventsMap, Socket } from "socket.io";
 
 export interface ClientData {
-	user: { id: number; username: string };
+	user: { id: number };
 }
 
 export type ChatSocket = Socket<
