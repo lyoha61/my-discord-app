@@ -101,7 +101,7 @@ export class AuthController {
 
 	@Post('/register')
 	@HttpCode(HttpStatus.CREATED)
-	async register(@Body() body: RegisterUserDto) {
+	async register(@Body() body: RegisterUserDto): Promise<TokensResponse> {
 		try {
 			const { password, email } = body;
 			const username = this.generateTemporaryUsername(email);
@@ -114,11 +114,12 @@ export class AuthController {
 
 			await this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
 
-			this.logger.log(`User registered id: ${user.id}`);
 			return {
-				tokens,
-				user: user,
+				access_token: tokens.access_token,
+				refresh_token: tokens.refresh_token,
+				expires_in: Math.floor(ms(this.accessTokenExpires) / 1000),
 			};
+
 		} catch (err) {
 			this.logger.error('Ошибка регистрации пользователя', err);
 			throw err;
@@ -139,7 +140,6 @@ export class AuthController {
 
 		await this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
 
-		this.logger.log(`User logged in id: ${user.id}`);
 		return {
 			access_token: tokens.access_token,
 			refresh_token: tokens.refresh_token,
@@ -153,7 +153,7 @@ export class AuthController {
 		@UserDecorator('id') userId: number,
 	): Promise<{ success: boolean }> {
 		await this.refreshTokenService.deleteToken(userId);
-		this.logger.log(`User ${userId} logout`);
+
 		return { success: true };
 	}
 
@@ -163,7 +163,6 @@ export class AuthController {
 	): Promise<RefreshAccessTokenResponse> {
 		const refreshToken = body.refresh_token;
 		const userId = this.getUserFromToken(refreshToken);
-		this.logger.log(`User id: ${userId} fetched refresh token`);
 
 		if (!(await this.refreshTokenService.isTokenValid(userId, refreshToken)))
 			throw new UnauthorizedException('Token invalid');
@@ -173,8 +172,6 @@ export class AuthController {
 		const accessToken = this.generateToken(user, this.accessTokenExpires);
 
 		await this.refreshTokenService.setToken(userId, accessToken);
-
-		this.logger.log(`Success refresh access token for user id: ${userId}`);
 
 		return {
 			user_id: userId,

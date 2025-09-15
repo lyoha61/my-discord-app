@@ -1,15 +1,24 @@
-import type { RegisterRes, TokensResponse } from "shared/types/auth";
+import type { TokensResponse } from "shared/types/auth";
 import { jwtDecode } from "jwt-decode";
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
 let refreshTimeout: number | null = null;
 
+
+const isTokenResponse = (data: any): data is TokensResponse => {
+	return typeof data?.access_token === 'string' &&
+				 typeof data?. expires_in === 'number';
+}
+
 export const saveTokens = (data: TokensResponse): void => {
+	console.log('Enter savetokens')
+	console.log(data)
 	accessToken = data.access_token;
 	localStorage.setItem('access_token', accessToken);
 
 	if(data.refresh_token) {
+		console.log('Enter in if')
 		refreshToken = data.refresh_token;
 		localStorage.setItem('refresh_token', refreshToken);
 	};
@@ -42,13 +51,25 @@ export const getCurrentUserId = (): number | null  => {
 export const register = async(
 	email: string,
 	password: string
-): Promise<RegisterRes> => {
+): Promise<void> => {
 	const res = await fetch('/auth/register', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ email, password })
 	});
-	return await res.json();
+
+	const data = await res.json()
+
+	if (!res.ok) {
+		console.error(data);
+		throw new Error(data)
+	}
+
+	if (!isTokenResponse(data)) {
+		throw new Error('Invalid response format from server');
+	}
+
+	saveTokens(data);
 }
 
 export const login = async(
@@ -61,12 +82,17 @@ export const login = async(
 		body: JSON.stringify({ email, password })
 	});
 
+	const data = await res.json();
+
 	if (!res.ok) {
-		console.error(await res.json());
+		console.error(data);
+		throw new Error(data)
+	}
+	
+	if (!isTokenResponse(data)) {
+		throw new Error('Invalid response format from server');
 	}
 
-	const data = await res.json();
-	
 	saveTokens(data);
 }
 

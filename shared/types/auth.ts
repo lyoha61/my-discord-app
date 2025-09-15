@@ -18,11 +18,6 @@ export interface RefreshAccessTokenResponse extends AccessTokenResponse {
 	user_id: number;
 }
 
-export interface RegisterRes {
-	tokens: TokensResponse;
-	user: User;
-}
-
 export interface SocketAuth {
 	access_token: string;
 }
