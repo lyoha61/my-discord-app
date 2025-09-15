@@ -1,6 +1,6 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { Chat, ChatMember, User } from "@prisma/client";
-import { PrismaService } from "src/prisma/prisma.service";
+import { Injectable, Logger } from '@nestjs/common';
+import { Chat, ChatMember, User } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ChatService {
@@ -18,7 +18,7 @@ export class ChatService {
 		const missingIds = userIds.filter((id) => !existingUsersIds.includes(id));
 
 		if (missingIds.length > 0) {
-			throw new Error(`Users not found ids: ${missingIds.join(",")}`);
+			throw new Error(`Users not found ids: ${missingIds.join(',')}`);
 		}
 	}
 
@@ -105,7 +105,7 @@ export class ChatService {
 			});
 		});
 
-		if (!chat) throw new Error("Failed to create chat");
+		if (!chat) throw new Error('Failed to create chat');
 
 		this.logger.log(`New chat created id: ${chat.id}`);
 

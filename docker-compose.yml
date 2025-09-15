@@ -1,6 +1,8 @@
 services:
   app:
     build: .
+    env_file:
+      - .env.prod
     container_name: my_discord_app
     ports: 
       - "3000:3000"

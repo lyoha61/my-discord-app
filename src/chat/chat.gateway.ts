@@ -1,24 +1,24 @@
-import { Logger, UseGuards } from "@nestjs/common";
+import { Logger, UseGuards } from '@nestjs/common';
 import {
 	WebSocketServer,
 	SubscribeMessage,
 	WebSocketGateway,
-} from "@nestjs/websockets";
-import { Server } from "socket.io";
-import { MessageService } from "src/message/message.service";
-import { WsJwtGuard } from "./guards/ws-jwt.guard";
+} from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import { MessageService } from 'src/message/message.service';
+import { WsJwtGuard } from './guards/ws-jwt.guard';
 import type {
 	ClientMessagePayload,
 	ClientUpdateMessagePayload,
-} from "shared/types/message";
-import { SocketAuth } from "shared/types/auth";
-import { JwtService } from "@nestjs/jwt";
-import { EVENTS, USER_STATUS } from "shared/events";
-import type { ChatSocket } from "./types/socket";
+} from 'shared/types/message';
+import { SocketAuth } from 'shared/types/auth';
+import { JwtService } from '@nestjs/jwt';
+import { EVENTS, USER_STATUS } from 'shared/events';
+import type { ChatSocket } from './types/socket';
 import {
 	mapMessageToClient,
 	mapUpdatedMessageToClient,
-} from "shared/utils/messageMapper";
+} from 'shared/utils/messageMapper';
 
 interface JwtPayload {
 	sub: number;
@@ -28,7 +28,7 @@ interface JwtPayload {
 
 @WebSocketGateway({
 	cors: {
-		origin: "*",
+		origin: '*',
 	},
 })
 export class ChatGateway {
@@ -44,7 +44,7 @@ export class ChatGateway {
 	) {}
 
 	afterInit() {
-		this.logger.log("WebSocket Server Initialized");
+		this.logger.log('WebSocket Server Initialized', { userId: 3 });
 	}
 
 	handleConnection(client: ChatSocket) {

@@ -36,7 +36,6 @@ export class UserController {
 
 	@Get('/me')
 	async getMe(@User('id') userId: number): Promise<UserResponse> {
-		this.logger.log(`User fetched data about himself ${userId}`);
 		const user = await this.userService.getMe(userId);
 
 		return { user: this.formattedUser(user) };

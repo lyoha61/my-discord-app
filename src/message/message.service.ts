@@ -1,8 +1,8 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { Message } from "@prisma/client";
-import { PrismaService } from "src/prisma/prisma.service";
-import { GetMessagesDto } from "./dto/get-messages.dto";
-import { MessageWithAuthor } from "./types/message";
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Message } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { GetMessagesDto } from './dto/get-messages.dto';
+import { MessageWithAuthor } from './types/message';
 
 @Injectable()
 export class MessageService {
@@ -42,7 +42,7 @@ export class MessageService {
 		chatId: number,
 		query: GetMessagesDto,
 	): Promise<MessageWithAuthor[]> {
-		const { sort = "asc" } = query;
+		const { sort = 'asc' } = query;
 		const messages = await this.prisma.message.findMany({
 			where: {
 				chat_id: chatId,
@@ -65,7 +65,7 @@ export class MessageService {
 	): Promise<MessageWithAuthor> {
 		try {
 			if (!text || !userId || !chatId)
-				throw new Error("Invalid input data for saving message");
+				throw new Error('Invalid input data for saving message');
 
 			const message = await this.prisma.message.create({
 				data: {
@@ -88,7 +88,7 @@ export class MessageService {
 
 			this.logger.log(
 				JSON.stringify({
-					event: "Message saved",
+					event: 'Message saved',
 					messageId: message.id,
 					chatId,
 					userId,
@@ -100,7 +100,7 @@ export class MessageService {
 			if (err instanceof Error) {
 				this.logger.error(err.message);
 			} else {
-				this.logger.error("Error saving message");
+				this.logger.error('Error saving message');
 			}
 			throw err;
 		}
@@ -148,11 +148,11 @@ export class MessageService {
 				},
 			});
 			if (!result)
-				throw new NotFoundException("Message not found or access denied");
+				throw new NotFoundException('Message not found or access denied');
 
-			this.logger.log("Message deleted id: ${messageId}");
+			this.logger.log('Message deleted id: ${messageId}');
 			return {
-				message: "Message deleted",
+				message: 'Message deleted',
 				message_id: messageId,
 			};
 		} catch (err) {

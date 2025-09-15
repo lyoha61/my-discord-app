@@ -1,4 +1,4 @@
-import { DefaultEventsMap, Socket } from "socket.io";
+import { DefaultEventsMap, Socket } from 'socket.io';
 
 export interface ClientData {
 	user: { id: number };

@@ -1,6 +1,15 @@
 # my-discord-app
 Приложение в стиле Discord
 
+## Быстрый старт 🚀
+```
+git clone https://github.com/lyoha61/my-discord-app.git
+```
+
+```
+docker-compose up -d --build
+```
+
 ## Auth Module 👮‍♂️
 
 JWT аутентификация через Passport.js\

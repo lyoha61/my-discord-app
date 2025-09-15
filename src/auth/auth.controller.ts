@@ -77,10 +77,7 @@ export class AuthController {
 		return userId;
 	}
 
-	private async generateToken(
-		user: UserForToken,
-		expiresIn: string,
-	): Promise<string> {
+	private generateToken(user: UserForToken, expiresIn: string): string {
 		const payload = { sub: user.id };
 		return this.jwtService.sign(payload, { expiresIn });
 	}
@@ -115,7 +112,7 @@ export class AuthController {
 			});
 			const tokens = await this.generateTokens(user);
 
-			this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
+			await this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
 
 			this.logger.log(`User registered id: ${user.id}`);
 			return {
@@ -123,36 +120,31 @@ export class AuthController {
 				user: user,
 			};
 		} catch (err) {
-			this.logger.error('Ошибка регистрации пользователя', err.stack);
+			this.logger.error('Ошибка регистрации пользователя', err);
 			throw err;
 		}
 	}
 
 	@Post('/login')
 	async login(@Body() body: LoginUserDto): Promise<TokensResponse> {
-		try {
-			const { email, password } = body;
+		const { email, password } = body;
 
-			const user = await this.userService.findUserByEmail(email);
+		const user = await this.userService.findUserByEmail(email);
 
-			if (!user)
-				throw new UnauthorizedException(`User not found email:${email}`);
+		if (!user) throw new UnauthorizedException(`User not found email:${email}`);
 
-			await this.isPasswordValid(password, user.password);
+		await this.isPasswordValid(password, user.password);
 
-			const tokens = await this.generateTokens(user);
+		const tokens = await this.generateTokens(user);
 
-			this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
+		await this.refreshTokenService.saveToken(user.id, tokens.refresh_token);
 
-			this.logger.log(`User logged in id: ${user.id}`);
-			return {
-				access_token: tokens.access_token,
-				refresh_token: tokens.refresh_token,
-				expires_in: Math.floor(ms(this.accessTokenExpires) / 1000),
-			};
-		} catch (err) {
-			throw err;
-		}
+		this.logger.log(`User logged in id: ${user.id}`);
+		return {
+			access_token: tokens.access_token,
+			refresh_token: tokens.refresh_token,
+			expires_in: Math.floor(ms(this.accessTokenExpires) / 1000),
+		};
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -160,13 +152,9 @@ export class AuthController {
 	async logout(
 		@UserDecorator('id') userId: number,
 	): Promise<{ success: boolean }> {
-		try {
-			await this.refreshTokenService.deleteToken(userId);
-			this.logger.log(`User ${userId} logout`);
-			return { success: true };
-		} catch (err) {
-			throw err;
-		}
+		await this.refreshTokenService.deleteToken(userId);
+		this.logger.log(`User ${userId} logout`);
+		return { success: true };
 	}
 
 	@Post('/refresh')
@@ -177,14 +165,14 @@ export class AuthController {
 		const userId = this.getUserFromToken(refreshToken);
 		this.logger.log(`User id: ${userId} fetched refresh token`);
 
-		if (!this.refreshTokenService.isTokenValid(userId, refreshToken))
+		if (!(await this.refreshTokenService.isTokenValid(userId, refreshToken)))
 			throw new UnauthorizedException('Token invalid');
 
 		const user = await this.userService.getUser(userId);
 
-		const accessToken = await this.generateToken(user, this.accessTokenExpires);
+		const accessToken = this.generateToken(user, this.accessTokenExpires);
 
-		this.refreshTokenService.setToken(userId, accessToken);
+		await this.refreshTokenService.setToken(userId, accessToken);
 
 		this.logger.log(`Success refresh access token for user id: ${userId}`);
 
