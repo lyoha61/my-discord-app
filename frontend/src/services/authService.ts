@@ -1,14 +1,21 @@
 import type { TokensResponse } from "shared/types/auth";
 import { jwtDecode } from "jwt-decode";
+import { httpClient, type HttpError } from "src/api/http-client";
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
 let refreshTimeout: number | null = null;
 
 
-const isTokenResponse = (data: any): data is TokensResponse => {
-	return typeof data?.access_token === 'string' &&
-				 typeof data?. expires_in === 'number';
+const isTokenResponse = (data: unknown): data is TokensResponse => {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		'access_token' in data &&
+		'expires_in' in data &&
+		typeof data?.access_token === 'string' &&
+		typeof data?. expires_in === 'number'
+	);
 }
 
 export const saveTokens = (data: TokensResponse): void => {
@@ -52,18 +59,7 @@ export const register = async(
 	email: string,
 	password: string
 ): Promise<void> => {
-	const res = await fetch('/auth/register', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ email, password })
-	});
-
-	const data = await res.json()
-
-	if (!res.ok) {
-		console.error(data);
-		throw new Error(data)
-	}
+	const data = await httpClient.post<TokensResponse>('auth/register', {email, password});
 
 	if (!isTokenResponse(data)) {
 		throw new Error('Invalid response format from server');
@@ -76,18 +72,8 @@ export const login = async(
 	email: string,
 	password: string,
 ): Promise<void> => {
-	const res = await fetch('/auth/login', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ email, password })
-	});
-
-	const data = await res.json();
-
-	if (!res.ok) {
-		console.error(data);
-		throw new Error(data)
-	}
+	
+	const data = await httpClient.post('auth/login', {email, password})
 	
 	if (!isTokenResponse(data)) {
 		throw new Error('Invalid response format from server');
@@ -97,16 +83,7 @@ export const login = async(
 }
 
 export const logout = async () => {
-	const res = await fetch('auth/logout', {
-		method: 'POST',
-		headers: {
-			'Authorization': `Bearer ${accessToken}`
-		}
-	});
-
-	if (!res.ok) {
-		console.log(await res.json());
-	}
+	await httpClient.post('auth/logout');
 
 	localStorage.removeItem('access_token');
 	localStorage.removeItem('refresh_token');
@@ -122,28 +99,18 @@ export const refreshAccessToken = async (): Promise<void> => {
 	if (!refreshToken) {
 		throw new Error("No refresh token available");
 	}
-
-	const res = await fetch('auth/refresh', {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({ refresh_token : refreshToken })
-	});
-
-	if(res.status === 401 || res.status === 403) {
-		localStorage.removeItem('access_token');
-		localStorage.removeItem('refresh_token');
-		accessToken = null;
-		refreshToken = null;
-		throw new Error('Refresh token expired, please login again');
+	try {
+		const data = await httpClient.post<TokensResponse>('auth/refresh', {refresh_token : refreshToken});
+			saveTokens(data); 
+	} catch (err) {
+		if((err as HttpError).status === 401 || 
+			(err as HttpError).status === 403
+		) {
+			localStorage.removeItem('access_token');
+			localStorage.removeItem('refresh_token');
+			accessToken = null;
+			refreshToken = null;
+			throw new Error('Refresh token expired, please login again');
 	}
-
-	if (!res.ok) {
-		console.error(await res.json());
-		return;
 	}
-
-	const data: TokensResponse = await res.json();
-	saveTokens(data);
 };

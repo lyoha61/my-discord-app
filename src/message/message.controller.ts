@@ -4,7 +4,6 @@ import {
 	HttpCode,
 	HttpStatus,
 	Post,
-	Req,
 	UseGuards,
 	Logger,
 	Get,
@@ -42,8 +41,6 @@ export class MessageController {
 
 	@Get()
 	async getPrivateChatMessages(
-		@Req() req: Request,
-		@User('id') userId: number,
 		@Param('chatId', ParseIntPipe) chatId: number,
 		@Query() query: GetMessagesDto,
 	): Promise<MessagesResponseRest> {

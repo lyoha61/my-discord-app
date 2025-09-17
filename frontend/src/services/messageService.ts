@@ -1,22 +1,13 @@
 import type { MessagesResponse } from "shared/types/message";
-
-interface GetMessagesOptions {
-	sort?: 'asc' | 'desc'
-}
+import { httpClient } from "src/api/http-client";
+import type { GetMessagesOptions } from "src/types/api";
 
 export const getMessages = async (
 	chatId: number, 
-	options: GetMessagesOptions = {}
+	options?: GetMessagesOptions
 ): Promise<MessagesResponse> => {
 
-	const params = new URLSearchParams();
-	if (options.sort) params.append('sort', options.sort);
-		else params.append('sort', 'asc');
-	
-	const res = await fetch(`chats/${chatId}/messages?${params.toString()}`);
-	if(!res.ok) throw new Error('Failed to fetch messages');
-
-	return await res.json();
+	return httpClient.get<MessagesResponse>(`chats/${chatId}/messages`, options)
 }
 
 export const updateMessage = async(
@@ -25,29 +16,9 @@ export const updateMessage = async(
 	text: string
 ): Promise<void> => {
 
-	const res = await fetch(`chats/${chatId}/messages/${messageId}`, {
-		method: "PATCH",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({text})
-	});
-	
-	if (!res.ok) {
-		const data = await res.json();
-		console.error(data)
-		throw new Error(data);
-	}
+	httpClient.patch(`chats/${chatId}/messages/${messageId}`, {text});
 }
 
 export const deleteMessage = async (chatId: number, messageId: number): Promise<void> => {
-	const res = await fetch(`chats/${chatId}/messages/${messageId}`, {
-		method: "DELETE",
-	});
-
-	if (!res.ok) {
-		const data = await res.json();
-		console.error(data)
-		throw new Error(data);
-	}
+	httpClient.del(`chats/${chatId}/messages/${messageId}`)
 }

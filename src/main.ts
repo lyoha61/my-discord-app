@@ -11,6 +11,8 @@ async function bootstrap() {
 
 	app.useLogger(new CustomLogger());
 
+	app.setGlobalPrefix('api/v1')
+
 	app.useGlobalFilters(new AllExceptionsFilter());
 
 	await app.listen(process.env.PORT ?? 3000);
