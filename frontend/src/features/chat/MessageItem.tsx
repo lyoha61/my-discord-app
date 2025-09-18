@@ -6,17 +6,15 @@ import { useSocketContext } from "src/context/SocketContext";
 interface MessageItemProps {
 	msg: ClientMessage;
 	currentUserId: number;
-	onDelete: (chatId: number, messageId: number) => void;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
 	msg, 
 	currentUserId, 
-	onDelete,
 }) => {
 	const isCurrentUser = msg.author_id === currentUserId;
 	const time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-	const { updateMessage } = useSocketContext();
+	const { updateMessage, deleteMessage } = useSocketContext();
 	const [hovered, setHovered] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editText, setEditText] = useState(msg.text);
@@ -35,14 +33,26 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
 	const handleEditSubmit = async () => {
 		if (editText.trim() && editText !== msg.text) {
-			updateMessage({
+			await updateMessage({
 				text: editText.trim(),
 				message_id: msg.id,
-				chat_id: msg.chat_id,
-			})
+			});
+			msg.text = editText.trim();
 		}
 		setIsEditing(false);
 	}
+
+	const handleDelete = async () => {
+		try {
+			await deleteMessage({message_id: msg.id})
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				console.error(`Error delete message ${msg.id} error: ${err.message}`)
+			} else {
+				console.error(`Error delete message ${msg.id}`)
+			}
+		}
+	};
 
 	return (
 		<div 
@@ -108,7 +118,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 						</button>
 						<button 
 							className="text-red-500 hover:text-red-400 cursor-pointer"
-							onClick={() => onDelete(msg.chat_id, msg.id)}
+							onClick={() => handleDelete()}
 						>
 							Удалить
 						</button>

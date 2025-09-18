@@ -1,12 +1,13 @@
 import { createContext, useContext} from "react";
 import { Socket } from 'socket.io-client';
-import type { ClientMessagePayload, ClientUpdateMessagePayload } from "shared/types/message";
+import type { WsMessageBase, WsMessageNew, WsMessageUpdate } from "shared/types/websocket/message";
 
 export type SocketContextValue = {
 	chatSocket: Socket | null;
 	onlineUsers: number[];
-	sendMessage: (payload: ClientMessagePayload) => void;
-	updateMessage: (payload: ClientUpdateMessagePayload) => void;
+	sendMessage: (payload: WsMessageNew) => void;
+	updateMessage: (payload: WsMessageUpdate) => void;
+	deleteMessage: (payload: WsMessageBase) => void;
 }
 
 export const SocketContext = createContext<SocketContextValue | undefined>(undefined);

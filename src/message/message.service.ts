@@ -110,7 +110,6 @@ export class MessageService {
 		text: string,
 		messageId: number,
 		userId: number,
-		chatId: number,
 	) {
 		try {
 			const message = await this.findMessage(messageId, userId);
@@ -123,7 +122,6 @@ export class MessageService {
 				where: {
 					id: messageId,
 					author_id: userId,
-					chat_id: chatId,
 				},
 				data: {
 					text,
@@ -139,7 +137,7 @@ export class MessageService {
 		}
 	}
 
-	async destroyMessage(messageId: number, userId: number) {
+	async destroyMessage(messageId: number, userId: number): Promise<void> {
 		try {
 			const result = await this.prisma.message.delete({
 				where: {
@@ -150,11 +148,8 @@ export class MessageService {
 			if (!result)
 				throw new NotFoundException('Message not found or access denied');
 
-			this.logger.log('Message deleted id: ${messageId}');
-			return {
-				message: 'Message deleted',
-				message_id: messageId,
-			};
+			this.logger.log(`Message deleted id: ${messageId}`);
+
 		} catch (err) {
 			this.logger.error(`Failed delete message id: ${messageId}`);
 			throw err;

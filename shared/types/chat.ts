@@ -1,4 +1,4 @@
-import type { UserStatus } from "shared/events";
+import type { UserStatus } from "shared/types/websocket/events";
 
 export interface MemberPrivateChat {
 	id: number;

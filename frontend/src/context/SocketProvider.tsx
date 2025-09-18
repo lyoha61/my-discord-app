@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import {Socket, io} from 'socket.io-client';
 import { getAccessToken, refreshAccessToken } from "src/services/authService";
-import { EVENTS, USER_STATUS } from 'shared/events';
-import type { ClientMessagePayload } from "shared/types/message";
+import { EVENTS, USER_STATUS } from 'shared/types/websocket/events';
 import { SocketContext, type SocketContextValue } from "./SocketContext";
 import type { UserStatusPayload } from "shared/types/chat";
+import type { WsMessageBase, WsMessageNew, WsMessageUpdate } from "shared/types/websocket/message";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [chatSocket, setChatSocket] = useState<Socket | null>(null);
@@ -49,20 +49,23 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	}, []);
 
 
-	const sendMessage = (payload: unknown) => {
+	const sendMessage = (payload: WsMessageNew) => {
 		if (!chatSocket) return;
 
 		pendingMessageRef.current = payload;
 		chatSocket.emit(EVENTS.MESSAGE_NEW, payload);
 	}
 
-	const updateMessage = (payload: ClientMessagePayload) => chatSocket?.emit(EVENTS.MESSAGE_UPDATE, payload)
+	const updateMessage = (payload: WsMessageUpdate) => chatSocket?.emit(EVENTS.MESSAGE_UPDATE, payload)
+
+	const deleteMessage = (payload: WsMessageBase) => chatSocket?.emit(EVENTS.MESSAGE_DELETE, payload);
 
 	const value: SocketContextValue = {
 		chatSocket,
 		onlineUsers,
 		sendMessage,
 		updateMessage,
+		deleteMessage,
 	}
 
 	return (

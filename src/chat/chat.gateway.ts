@@ -4,27 +4,29 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { MessageService } from 'src/message/message.service';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
-import type {
-	ClientMessagePayload,
-	ClientUpdateMessagePayload,
-} from 'shared/types/message';
 import { SocketAuth } from 'shared/types/auth';
 import { JwtService } from '@nestjs/jwt';
-import { EVENTS, USER_STATUS } from 'shared/events';
-import type { ChatSocket } from './types/socket';
+import { ClientToServerEvents, EVENTS, ServerToClientEvents, USER_STATUS } from 'shared/types/websocket/events';
 import {
 	mapMessageToClient,
 	mapUpdatedMessageToClient,
 } from 'shared/utils/messageMapper';
+import type { WsMessageBase, WsMessageNew, WsMessageUpdate } from 'shared/types/websocket/message';
 
 interface JwtPayload {
 	sub: number;
 	iat?: number;
 	exp?: number;
 }
+
+interface ChatSocketData {
+	user: {id: number}
+}
+
+export type ChatSocket = Socket<ClientToServerEvents, ServerToClientEvents, any, ChatSocketData>
 
 @WebSocketGateway({
 	cors: {
@@ -33,7 +35,7 @@ interface JwtPayload {
 })
 export class ChatGateway {
 	@WebSocketServer()
-	server: Server;
+	server: Server<ClientToServerEvents, ServerToClientEvents>
 
 	private readonly logger = new Logger(ChatGateway.name);
 	private onlineUsers = new Map<number, string>();
@@ -101,7 +103,7 @@ export class ChatGateway {
 	@SubscribeMessage(EVENTS.MESSAGE_NEW)
 	async handleNewMessage(
 		client: ChatSocket,
-		payload: ClientMessagePayload,
+		payload: WsMessageNew,
 	): Promise<void> {
 		try {
 			const msg = await this.messageService.storeMessage(
@@ -113,7 +115,6 @@ export class ChatGateway {
 			const formattedMessage = mapMessageToClient(msg);
 
 			this.server.emit(EVENTS.MESSAGE_NEW, {
-				clientId: client.id,
 				...formattedMessage,
 			});
 		} catch (err) {
@@ -126,28 +127,38 @@ export class ChatGateway {
 	@SubscribeMessage(EVENTS.MESSAGE_UPDATE)
 	async handleUpdateMessage(
 		client: ChatSocket,
-		payload: ClientUpdateMessagePayload,
+		payload: WsMessageUpdate,
 	): Promise<void> {
 		const updatedMsg = await this.messageService.updateMessage(
 			payload.text,
 			payload.message_id,
 			client.data.user.id,
-			payload.chat_id,
 		);
 
-		const formattedMessage = mapUpdatedMessageToClient(updatedMsg);
+		const {id: message_id, text: new_text, ...formattedMessage} = mapUpdatedMessageToClient(updatedMsg);
 
 		this.logger.log({
 			event: EVENTS.MESSAGE_UPDATE,
 			userId: client.data.user.id,
 			messageId: payload.message_id,
-			chatId: payload.chat_id,
 			newText: payload.text,
 		});
 
 		this.server.emit(EVENTS.MESSAGE_UPDATE, {
-			clientId: client.id,
 			...formattedMessage,
+			new_text,
+			message_id,
 		});
+	}
+
+	@UseGuards(WsJwtGuard)
+	@SubscribeMessage(EVENTS.MESSAGE_DELETE)
+	async handleDelMsg(
+		socket: ChatSocket,
+		payload: WsMessageBase
+	) {
+		await this.messageService.destroyMessage(payload.message_id, socket.data.user.id);
+
+		this.server.emit(EVENTS.MESSAGE_DELETE, {message_id: payload.message_id});
 	}
 }

@@ -83,7 +83,6 @@ export class MessageController {
 		@Body() body: UpdateMessageDto,
 		@User('id') userId: number,
 		@Param('messageId', ParseIntPipe) messageId: number,
-		@Param('chatId', ParseIntPipe) chatId: number,
 	) {
 		const { text } = body;
 
@@ -91,7 +90,6 @@ export class MessageController {
 			text,
 			messageId,
 			userId,
-			chatId,
 		);
 
 		return updatedMessage;

@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useSocketContext } from "../../context/SocketContext";
 import type { ClientMessage, MessageNewEvent, MessageUpdateEvent } from "shared/types/message";
-import { deleteMessage, getMessages } from "../../services/messageService";
+import { getMessages } from "../../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
 import { AnimatePresence } from "framer-motion";
 import { formatDate } from "src/utils/formatDate";
 import { MessageItem } from "./MessageItem";
 import { ChatInput } from "./ChatInput";
-import { EVENTS } from "shared/events";
+import { EVENTS } from "shared/types/websocket/events";
 import { ChatHeader } from "./ChatHeader";
+import type { WsMessageBase } from "shared/types/websocket/message";
 
 const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
@@ -48,6 +49,13 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 			)
 		})
 
+		chatSocket.on(EVENTS.MESSAGE_DELETE, (deletedMsg: WsMessageBase) => {
+			console.log(deletedMsg);
+			setMessages(prev => 
+				prev.filter(msg => msg.id !== deletedMsg.message_id)
+			)
+		})
+
 		return () => {
 			chatSocket.off(EVENTS.MESSAGE_NEW);
 		}
@@ -60,11 +68,6 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	if (!currentUserId) {
 		// TODO: перекидывать на страницу 401
 		return <div>Пожалуйста, войдите, чтобы открыть чат</div>
-	}
-
-	const handleDelete = async (chatId: number, messageId: number) => {
-		await deleteMessage(chatId, messageId);
-		setMessages(prev => prev.filter(m => m.id !== messageId));
 	}
 	
 	if (!chatId) return; 
@@ -93,7 +96,6 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 								<MessageItem 
 									msg={msg} 
 									currentUserId={currentUserId} 
-									onDelete={handleDelete}
 								/>
 							</div>
 						);

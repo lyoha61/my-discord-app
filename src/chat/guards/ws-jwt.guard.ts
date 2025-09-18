@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
-import { EVENTS } from 'shared/events';
+import { EVENTS } from 'shared/types/websocket/events';
 import { Socket } from 'socket.io';
+import { ChatSocket } from '../chat.gateway';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
@@ -16,7 +17,7 @@ export class WsJwtGuard implements CanActivate {
 	constructor(private readonly jwtService: JwtService) {}
 
 	canActivate(context: ExecutionContext) {
-		const client: Socket = context.switchToWs().getClient();
+		const client: ChatSocket = context.switchToWs().getClient();
 		const token = client.handshake.auth.access_token;
 		try {
 			if (!token) throw new WsException('Token is missing');
@@ -25,9 +26,15 @@ export class WsJwtGuard implements CanActivate {
 			client.data.user = { id: payload.sub };
 			return true;
 		} catch (err) {
-			this.logger.error(
-				`Client ${client.id} send invalid token: ${err.message}`,
-			);
+			if (err instanceof Error) {
+				this.logger.error(
+					`Client ${client.id} send invalid token: ${err.message}`,
+				);
+			} else {
+				this.logger.error(
+					`Client ${client.id} send invalid token: ${err}`,
+				);
+			}
 			client.emit(EVENTS.TOKEN_EXPIRED);
 			throw new WsException('Invalid Token');
 		}
