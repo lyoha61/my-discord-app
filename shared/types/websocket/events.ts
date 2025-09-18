@@ -1,3 +1,4 @@
+import { ClientMessage } from "../message";
 import { WsMessageBase, WsMessageNew, WsMessageUpdate, WsMessageUpdateEvent } from "./message";
 
 export const EVENTS = {
@@ -32,7 +33,7 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToClientEvents {
-	[EVENTS.MESSAGE_NEW]: (data: WsMessageNew) => void;
+	[EVENTS.MESSAGE_NEW]: (data: ClientMessage) => void;
 	[EVENTS.MESSAGE_UPDATE]: (data: WsMessageUpdateEvent) => void;
 	[EVENTS.MESSAGE_DELETE]: (data: WsMessageBase) => void;
 

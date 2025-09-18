@@ -4,7 +4,7 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { MessageService } from 'src/message/message.service';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { SocketAuth } from 'shared/types/auth';
@@ -15,18 +15,7 @@ import {
 	mapUpdatedMessageToClient,
 } from 'shared/utils/messageMapper';
 import type { WsMessageBase, WsMessageNew, WsMessageUpdate } from 'shared/types/websocket/message';
-
-interface JwtPayload {
-	sub: number;
-	iat?: number;
-	exp?: number;
-}
-
-interface ChatSocketData {
-	user: {id: number}
-}
-
-export type ChatSocket = Socket<ClientToServerEvents, ServerToClientEvents, any, ChatSocketData>
+import type { ChatSocket, JwtPayload } from 'shared/types/websocket/socket';
 
 @WebSocketGateway({
 	cors: {
@@ -131,23 +120,21 @@ export class ChatGateway {
 	): Promise<void> {
 		const updatedMsg = await this.messageService.updateMessage(
 			payload.text,
-			payload.message_id,
+			payload.id,
 			client.data.user.id,
 		);
 
-		const {id: message_id, text: new_text, ...formattedMessage} = mapUpdatedMessageToClient(updatedMsg);
+		const {...formattedMessage} = mapUpdatedMessageToClient(updatedMsg);
 
 		this.logger.log({
 			event: EVENTS.MESSAGE_UPDATE,
 			userId: client.data.user.id,
-			messageId: payload.message_id,
+			messageId: payload.id,
 			newText: payload.text,
 		});
 
 		this.server.emit(EVENTS.MESSAGE_UPDATE, {
 			...formattedMessage,
-			new_text,
-			message_id,
 		});
 	}
 
@@ -157,8 +144,8 @@ export class ChatGateway {
 		socket: ChatSocket,
 		payload: WsMessageBase
 	) {
-		await this.messageService.destroyMessage(payload.message_id, socket.data.user.id);
+		await this.messageService.destroyMessage(payload.id, socket.data.user.id);
 
-		this.server.emit(EVENTS.MESSAGE_DELETE, {message_id: payload.message_id});
+		this.server.emit(EVENTS.MESSAGE_DELETE, {id: payload.id});
 	}
 }

@@ -45,6 +45,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 		return () => {
 			socket.disconnect();
 			socket?.off(EVENTS.USER_STATUS_CHANGED);
+			socket?.off(EVENTS.MESSAGE_NEW);
+			socket?.off(EVENTS.MESSAGE_UPDATE);
+			socket?.off(EVENTS.MESSAGE_DELETE);
 		}
 	}, []);
 

@@ -35,7 +35,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 		if (editText.trim() && editText !== msg.text) {
 			await updateMessage({
 				text: editText.trim(),
-				message_id: msg.id,
+				id: msg.id,
 			});
 			msg.text = editText.trim();
 		}
@@ -44,7 +44,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
 	const handleDelete = async () => {
 		try {
-			await deleteMessage({message_id: msg.id})
+			await deleteMessage({id: msg.id})
 		} catch (err: unknown) {
 			if (err instanceof Error) {
 				console.error(`Error delete message ${msg.id} error: ${err.message}`)

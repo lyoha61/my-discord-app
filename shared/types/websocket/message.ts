@@ -1,5 +1,5 @@
 export interface WsMessageBase {
-  message_id: number;
+  id: number;
 }
 
 export interface WsMessageNew {
@@ -13,7 +13,6 @@ export interface WsMessageUpdate extends WsMessageBase {
 
 
 export interface WsMessageUpdateEvent extends WsMessageBase{
-	new_text: string;
 	updated_at: string;
 	created_at: string;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSocketContext } from "../../context/SocketContext";
-import type { ClientMessage, MessageNewEvent, MessageUpdateEvent } from "shared/types/message";
+import type { ClientMessage } from "shared/types/message";
 import { getMessages } from "../../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
 import { AnimatePresence } from "framer-motion";
@@ -37,22 +37,28 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 		
 		if(!chatSocket) return;
 		
-		chatSocket.on(EVENTS.MESSAGE_NEW, (message: MessageNewEvent) => {
+		chatSocket.on(EVENTS.MESSAGE_NEW, (message) => {
 			setMessages(prev => [...prev, message])
 		});
 
-		chatSocket.on(EVENTS.MESSAGE_UPDATE, (updatedMsg: MessageUpdateEvent) => {
+		chatSocket.on(EVENTS.MESSAGE_UPDATE, (updatedMsg) => {
 			setMessages(prev => 
-				prev.map(msg => 
-					msg.id === updatedMsg.id ? {...msg, ...updatedMsg} : msg
+				prev.map(msg => {
+						if (msg.id === updatedMsg.id ){
+							console.log(msg)
+							return {...msg, ...updatedMsg}
+						} else {
+							return msg
+					}}
+
+					// msg.id === updatedMsg.id ? {...msg, ...updatedMsg} : msg
 				)
 			)
 		})
 
 		chatSocket.on(EVENTS.MESSAGE_DELETE, (deletedMsg: WsMessageBase) => {
-			console.log(deletedMsg);
 			setMessages(prev => 
-				prev.filter(msg => msg.id !== deletedMsg.message_id)
+				prev.filter(msg => msg.id !== deletedMsg.id)
 			)
 		})
 
@@ -94,6 +100,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 								)}
 
 								<MessageItem 
+									key={msg.id}
 									msg={msg} 
 									currentUserId={currentUserId} 
 								/>
