@@ -1,15 +1,20 @@
 export interface Message {
 	id: number;
 	text: string;
-	updated_at: string;
-	created_at: string;
+	updated_at: Date;
+	created_at: Date;
 	author_id: number;
 	chat_id: number;
 }
 
-export type ClientMessageBase = Omit<Message, "created_at" | "updated_at"> & {
+export type ClientMessageBase = Omit<Message, "created_at" | "updated_at" | "read_at"> & {
 	created_at: string;
 	updated_at: string;
+	read_at: string | null;
+};
+
+export type ClientMessageRead = Omit<Message, "read_at"> & {
+	read_at: string;
 };
 
 export interface ClientMessage extends ClientMessageBase {

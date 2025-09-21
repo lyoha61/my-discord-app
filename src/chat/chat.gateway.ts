@@ -11,8 +11,9 @@ import { SocketAuth } from 'shared/types/auth';
 import { JwtService } from '@nestjs/jwt';
 import { ClientToServerEvents, EVENTS, ServerToClientEvents, USER_STATUS } from 'shared/types/websocket/events';
 import {
+	mapMessageReadToClient,
 	mapMessageToClient,
-	mapUpdatedMessageToClient,
+	mapMessageToClientWithAutor,
 } from 'shared/utils/messageMapper';
 import type { WsMessageBase, WsMessageNew, WsMessageUpdate } from 'shared/types/websocket/message';
 import type { ChatSocket, JwtPayload } from 'shared/types/websocket/socket';
@@ -101,7 +102,7 @@ export class ChatGateway {
 				payload.chat_id,
 			);
 
-			const formattedMessage = mapMessageToClient(msg);
+			const formattedMessage = mapMessageToClientWithAutor(msg);
 
 			this.server.emit(EVENTS.MESSAGE_NEW, {
 				...formattedMessage,
@@ -124,7 +125,7 @@ export class ChatGateway {
 			client.data.user.id,
 		);
 
-		const {...formattedMessage} = mapUpdatedMessageToClient(updatedMsg);
+		const {...formattedMessage} = mapMessageToClient(updatedMsg);
 
 		this.logger.log({
 			event: EVENTS.MESSAGE_UPDATE,
@@ -146,6 +147,31 @@ export class ChatGateway {
 	) {
 		await this.messageService.destroyMessage(payload.id, socket.data.user.id);
 
+		this.logger.log({
+			event: EVENTS.MESSAGE_DELETE,
+			user_id: socket.data.user.id,
+			message_id: payload.id,
+		})
+
 		this.server.emit(EVENTS.MESSAGE_DELETE, {id: payload.id});
+	}
+
+	@UseGuards(WsJwtGuard)
+	@SubscribeMessage(EVENTS.MESSAGE_READ)
+	async handleReadMsg(
+		socket: ChatSocket,
+		payload: WsMessageBase,
+	): Promise<void> {
+		const message = await this.messageService.readMessage(payload.id);
+
+		this.logger.log({
+			event: EVENTS.MESSAGE_READ,
+			user_id: socket.data.user.id,
+			message_id: payload.id,
+		})
+
+		const { read_at: readAt } = mapMessageReadToClient(message);
+
+		this.server.emit(EVENTS.MESSAGE_READ, { id: message.id, read_at: readAt })
 	}
 }

@@ -63,12 +63,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 	const deleteMessage = (payload: WsMessageBase) => chatSocket?.emit(EVENTS.MESSAGE_DELETE, payload);
 
+	const readMessage = (payload: WsMessageBase) => chatSocket?.emit(EVENTS.MESSAGE_READ, payload);
+
 	const value: SocketContextValue = {
 		chatSocket,
 		onlineUsers,
 		sendMessage,
 		updateMessage,
 		deleteMessage,
+		readMessage,
 	}
 
 	return (

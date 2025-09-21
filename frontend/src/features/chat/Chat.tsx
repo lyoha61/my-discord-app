@@ -43,15 +43,10 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 
 		chatSocket.on(EVENTS.MESSAGE_UPDATE, (updatedMsg) => {
 			setMessages(prev => 
-				prev.map(msg => {
-						if (msg.id === updatedMsg.id ){
-							console.log(msg)
-							return {...msg, ...updatedMsg}
-						} else {
-							return msg
-					}}
-
-					// msg.id === updatedMsg.id ? {...msg, ...updatedMsg} : msg
+				prev.map(msg => 
+					msg.id === updatedMsg.id 
+					? {...msg, ...updatedMsg} 
+					: msg
 				)
 			)
 		})

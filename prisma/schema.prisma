@@ -36,9 +36,10 @@ model Message {
   text            String
   updated_at      DateTime     @default(now())
   created_at      DateTime     @default(now())
+  read_at         DateTime?     
   author          User         @relation(fields: [author_id], references: [id])
   author_id       Int
-  chat            Chat @relation(fields: [chat_id], references: [id])
+  chat            Chat         @relation(fields: [chat_id], references: [id])
   chat_id Int 
 
   @@map("messages")

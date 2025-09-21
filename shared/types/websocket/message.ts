@@ -16,3 +16,7 @@ export interface WsMessageUpdateEvent extends WsMessageBase{
 	updated_at: string;
 	created_at: string;
 }
+
+export interface WsMessageRead extends WsMessageBase {
+	read_at: string;
+}

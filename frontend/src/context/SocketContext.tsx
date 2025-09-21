@@ -9,6 +9,7 @@ export type SocketContextValue = {
 	sendMessage: (payload: WsMessageNew) => void;
 	updateMessage: (payload: WsMessageUpdate) => void;
 	deleteMessage: (payload: WsMessageBase) => void;
+	readMessage: (payload: WsMessageBase) => void;
 }
 
 export const SocketContext = createContext<SocketContextValue | undefined>(undefined);

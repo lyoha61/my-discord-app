@@ -1,7 +1,8 @@
 import type { ClientMessage } from "shared/types/message"
 import { AnimatePresence, motion} from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSocketContext } from "src/context/SocketContext";
+import CheckMark from "assets/icons/check-mark.svg?react";
 
 interface MessageItemProps {
 	msg: ClientMessage;
@@ -14,22 +15,67 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 }) => {
 	const isCurrentUser = msg.author_id === currentUserId;
 	const time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-	const { updateMessage, deleteMessage } = useSocketContext();
+	const { updateMessage, deleteMessage, readMessage } = useSocketContext();
 	const [hovered, setHovered] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editText, setEditText] = useState(msg.text);
+	const [isMultiLine, setIsMultiLine] = useState(false);
+	const [containerWidth, setContainerWidth] = useState("fit");
+
+	const infoRef = useRef<HTMLDivElement>(null);
+	const messageAllRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
+	const hiddenSpanRef = useRef<HTMLSpanElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const messageContainerRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
-		if (isEditing) inputRef.current?.focus();
-	}, [isEditing]);
+	useLayoutEffect(() => {
+		const textEl = messageContainerRef.current;
 
-	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.style.height = 'auto';
-			inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+		if (textEl) {
+			const style = window.getComputedStyle(textEl);
+			const lineHeight = parseFloat(style.lineHeight);
+			const height = textEl.getBoundingClientRect().height;
+
+			setIsMultiLine(height > lineHeight * 1.5);
 		}
-	}, [editText])
+	}, [msg.text, editText, isEditing]);
+
+	useEffect(() => {
+		const el = messageContainerRef.current;
+		if (!el) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting && !isCurrentUser) {
+						readMessage({id: msg.id});
+						observer.unobserve(el);
+					}
+				})
+			},
+			{ threshold: 0.7 }
+		);
+
+		observer.observe(el);
+
+		return () => {
+			observer.disconnect();
+		}
+	}, [msg, readMessage, isCurrentUser]);
+
+	useEffect(() => {
+		if(inputRef.current && isEditing) {
+			const textarea = inputRef.current;
+			setContainerWidth("full");
+			textarea.style.boxSizing = "border-box";
+			textarea.style.height = "auto";
+			textarea.style.height = `${textarea.scrollHeight}px`;
+			textarea.focus();
+		} else if (!isEditing) {
+			setContainerWidth('fit');
+		}
+	}, [isEditing, editText]);
 
 	const handleEditSubmit = async () => {
 		if (editText.trim() && editText !== msg.text) {
@@ -54,6 +100,10 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 		}
 	};
 
+	const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setEditText(e.target.value)
+	}
+
 	return (
 		<div 
 			className={`relative flex pt-6  ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
@@ -62,7 +112,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 		>
 			{/* Message */}
 			<motion.div 
-				className='flex flex-col items-start max-w-[65%]'
+				className='flex flex-col flex-1 items-start max-w-[55%]'
+				ref={containerRef}
 				whileHover={{ scale: 1.02 }}
 				initial={{ opacity: 0, y: 20, scale: 0.95 }}
 				animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -70,38 +121,75 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 				transition={{ duration: 0.25 }}
 			>
 				{/* Nickname */}
-				<div className={`text-xs font-medium mb-1 ${isCurrentUser ? 'text-blue-100' : 'text-gray-400'}`}>
+				<div className={`text-xs font-medium mb-1 ${isCurrentUser ? '' : 'text-gray-400'}`}>
 					{isCurrentUser ? '' : `${msg.author_name}`}
 				</div>
 
 				{/* Message text / Input */}
-				<div className={`text-sm px-3 py-2 rounded-lg break-all ${
-					isCurrentUser ? 'bg-[#4A90E2]' : 'bg-[#2A2A2A]'
-				}`}>
+				<div ref = { messageAllRef }
+					className={`relative flex max-w-[100%] min-w-[15%] text-sm pl-3 pr-1 pt-2  rounded-lg break-all ${
+						isCurrentUser ? 'bg-[#5364E6] self-end' : 'bg-[#2A2A2A]'
+					} ${isMultiLine ? 'flex-col pb-1' : 'flex-row pb-1'} ${
+						containerWidth === 'full' ? 'w-full' : 'w-fit'
+					}`
+				}
+				>
 					{isEditing ?(
-						<textarea
-							ref={inputRef}
-							value={editText}
-							onChange={e => setEditText(e.target.value)}
-							rows={1}
-							onKeyDown={e => e.key === 'Enter' && handleEditSubmit()}
-							className="outline-none resize-none overflow-hidden"
-						/>
+						<>
+							<textarea
+								ref={inputRef}
+								value={editText}
+								onChange={handleTextareaInput}
+								onKeyDown={e => e.key === 'Enter' && handleEditSubmit()}
+								className="w-fit w-full text-sm outline-none resize-none  overflow-hidden px-0"
+							/>
+						</>
 					) : (
-						msg.text
+						<>
+							<span 
+								ref={hiddenSpanRef}
+								className="whitespace-pre-wrap break-words absolute invisible text-sm"
+							/>
+
+							<div className="flex-1" ref={messageContainerRef}>
+								{msg.text}
+							</div>
+
+							{/* Add info message  */}
+							<div ref = {infoRef} className={`flex justify-end items-end text-xs text-[#ffffff] gap-1 py-1 whitespace-nowrap ${
+								isMultiLine ? "" : 'ml-2'
+							}`}>
+								
+								<div>
+									{msg.created_at === msg.updated_at 
+										? ''
+										: 'изменено'
+									}
+								</div>
+
+								<div 
+								className={`${
+									isCurrentUser ? 'self-end' : 'self-start'
+								}`}
+								>
+									{time}
+								</div>
+
+								<div className="flex h-[80%] items-end">
+									<CheckMark className={`w-3.5 fill-current ${
+										msg.read_at ? 'text-[#4A90E2]' : 'text-[#cccc]'
+									}` } />
+								</div>
+							</div>
+						</>
 					)}
+				
 				</div>
-
-				{/* Message Time */}
-				<div className={`flex text-xs mt-1 text-[#6B7280] ${
-					isCurrentUser ? 'self-end' : 'self-start'
-				}`}>{time}</div>
-
 			</motion.div>
 
 			{/* Actions */}
 			<AnimatePresence>
-				{hovered && (
+				{hovered && !isEditing && (
 					<motion.div
 						initial={{ opacity: 0, y: -12 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -126,6 +214,5 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 				)}
 			</AnimatePresence>
 		</div>
-);
-
+	)
 }

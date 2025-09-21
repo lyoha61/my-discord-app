@@ -1,10 +1,18 @@
 import { ClientMessage } from "../message";
-import { WsMessageBase, WsMessageNew, WsMessageUpdate, WsMessageUpdateEvent } from "./message";
+import { 
+	WsMessageBase,
+	WsMessageNew,
+	WsMessageRead,
+	WsMessageUpdate,
+	WsMessageUpdateEvent 
+} from "./message";
 
 export const EVENTS = {
 	MESSAGE_NEW: "message:new",
 	MESSAGE_UPDATE: "message:update",
 	MESSAGE_DELETE: "message:delete",
+	MESSAGE_READ: "message:read",
+
 	TOKEN_EXPIRED: "token_expired",
 	USER_STATUS_CHANGED: "user_status:changed",
 	ONLINE_USER_LIST: "online_user_list",
@@ -28,6 +36,7 @@ export interface ClientToServerEvents {
 	[EVENTS.MESSAGE_NEW]: (data: WsMessageNew) => void;
 	[EVENTS.MESSAGE_UPDATE]: (data:WsMessageUpdate) => void;
 	[EVENTS.MESSAGE_DELETE]: (data: WsMessageBase) => void;
+	[EVENTS.MESSAGE_READ]: (data: WsMessageBase) => void;
 
 	[EVENTS.USER_STATUS_CHANGED]: (data: { userId: number; status: UserStatus }) => void;
 }
@@ -36,6 +45,7 @@ export interface ServerToClientEvents {
 	[EVENTS.MESSAGE_NEW]: (data: ClientMessage) => void;
 	[EVENTS.MESSAGE_UPDATE]: (data: WsMessageUpdateEvent) => void;
 	[EVENTS.MESSAGE_DELETE]: (data: WsMessageBase) => void;
+	[EVENTS.MESSAGE_READ]: (data: WsMessageRead) => void;
 
 	[EVENTS.TOKEN_EXPIRED]: () => void;
 

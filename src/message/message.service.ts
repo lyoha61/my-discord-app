@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetMessagesDto } from './dto/get-messages.dto';
-import { MessageWithAuthor } from './types/message';
+import { MessageWithAuthor, MessageWithReadAt } from './types/message';
 
 @Injectable()
 export class MessageService {
@@ -22,6 +22,15 @@ export class MessageService {
 		});
 
 		return message;
+	}
+
+	async readMessage(messageId: number): Promise<MessageWithReadAt> {
+		const message = await this.prisma.message.update({
+			where: { id: messageId },
+			data: { read_at: new Date() }
+		})
+
+		return message as MessageWithReadAt;
 	}
 
 	async getMessage(messageId: number, userId: number) {
@@ -125,6 +134,7 @@ export class MessageService {
 				},
 				data: {
 					text,
+					updated_at: new Date()
 				},
 			});
 
