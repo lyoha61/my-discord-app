@@ -5,7 +5,7 @@ import { getMessages } from "../../services/messageService";
 import { getCurrentUserId } from "src/services/authService";
 import { AnimatePresence } from "framer-motion";
 import { formatDate } from "src/utils/formatDate";
-import { MessageItem } from "./MessageItem";
+import { MessageItem } from "./MessageItem/MessageItem";
 import { ChatInput } from "./ChatInput";
 import { EVENTS } from "shared/types/websocket/events";
 import { ChatHeader } from "./ChatHeader";
@@ -87,7 +87,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 						return (
 							<div key={msg.id}>
 								{showDate && (
-									<div className="flex justify-center">
+									<div className="flex justify-center mt-10">
 										<div className="bg-[#393939] rounded-full py-2 px-4 text-xs text-[#D1D5DB]">
 											{currentDate}
 										</div>
