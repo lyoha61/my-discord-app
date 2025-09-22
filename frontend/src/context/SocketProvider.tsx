@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {Socket, io} from 'socket.io-client';
 import { getAccessToken, refreshAccessToken } from "src/services/authService";
 import { EVENTS, USER_STATUS } from 'shared/types/websocket/events';
@@ -52,16 +52,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	}, []);
 
 
-	const sendMessage = (payload: WsMessageNew) => {
+	const sendMessage = async (payload: WsMessageNew) => {
 		if (!chatSocket) return;
 
 		pendingMessageRef.current = payload;
 		chatSocket.emit(EVENTS.MESSAGE_NEW, payload);
 	}
 
-	const updateMessage = (payload: WsMessageUpdate) => chatSocket?.emit(EVENTS.MESSAGE_UPDATE, payload)
+	const updateMessage = async (payload: WsMessageUpdate) => {
+    chatSocket?.emit(EVENTS.MESSAGE_UPDATE, payload);
+  }
 
-	const deleteMessage = (payload: WsMessageBase) => chatSocket?.emit(EVENTS.MESSAGE_DELETE, payload);
+	const deleteMessage = async (payload: WsMessageBase) => {
+    chatSocket?.emit(EVENTS.MESSAGE_DELETE, payload);
+  }
 
 	const readMessage = (payload: WsMessageBase) => chatSocket?.emit(EVENTS.MESSAGE_READ, payload);
 

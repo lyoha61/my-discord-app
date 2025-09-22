@@ -1,6 +1,6 @@
 import Input from "../../components/UI/Input"
 import SearchIcon from "../../assets/icons/search.png";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { getUsers } from "src/services/userService";
 import type { User } from "shared/types/user";
 import { UserCard } from "../../components/UI/UserCard";
@@ -37,8 +37,12 @@ export const UserSearch: React.FC<{
 
 	useEffect(() => {
 		const fetchUsers = async () => {
-			const data = await getUsers();
-			setUsers(data.users);
+      try {
+        const data = await getUsers();
+        setUsers(data.users);
+      } catch (err) {
+        console.error(err);
+      }
 		}
 		fetchUsers();
 	}, [])
@@ -56,7 +60,7 @@ export const UserSearch: React.FC<{
 			>
 				<motion.div 
 					ref={modalRef} 
-					className="bg-[#1A1A1A] border-1 border-[#393939] rounded-2xl shadow-lg w-[500px] h-[600px]"
+					className="flex flex-col bg-[#1A1A1A] border-1 border-[#393939] rounded-2xl shadow-lg w-[500px] h-[600px]"
 					initial={{ scale: 0.9, opacity: 0 }}
 					animate={{ scale: 1, opacity: 1 }}
 					exit={{ scale: 0.9, opacity: 0 }}
@@ -73,11 +77,11 @@ export const UserSearch: React.FC<{
 							id="user-search" 
 							label="Введите имя"
 							className="h-10"
-							icon={<img className="h-4" src={SearchIcon} />}
+							icon={<img className="h-4" src={SearchIcon} alt="loop" />}
 						/>
 					</div>
 
-					<div>
+					<div className="flex-1 scrollbar-hidden overflow-auto rounded-b-2xl ">
 						{users.map(user => (
 							<UserCard 
 								key={user.id}

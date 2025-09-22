@@ -1,29 +1,13 @@
-import { useEffect, useState } from "react";
-import { getAvailableChats } from "../../services/chatSevice"
 import { UserCard } from "../../components/UI/UserCard";
 import type { ChatResponse } from "shared/types/chat";
-
+import {getCurrentUserId} from "src/services/authService.ts";
 
 export const ChatList: React.FC<{
-  onSelectChat: (chatId: number) => void,
-  selectedChatId: number | null
-}> = ({ onSelectChat, selectedChatId }) => {
-
-  const [chats, setChats] = useState<ChatResponse[]>([]);
-
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const data = await getAvailableChats();
-        setChats(data.chats);
-
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchChats();
-  }, []);
-	
+  chats: ChatResponse[];
+  onSelectChat: (chatId: number) => void;
+  selectedChatId: number | null;
+}> = ({ chats, onSelectChat, selectedChatId }) => {
+  const currentUseId = getCurrentUserId();
 
 	return (
 		<div>
@@ -33,8 +17,10 @@ export const ChatList: React.FC<{
             className="cursor-pointer"
           >
             {chat.members.map(member => (
-              <UserCard 
-                member={member} 
+              member.id === currentUseId  ? null :
+              <UserCard
+                key={member.id}
+                member={member}
                 isSelected={chat.id === selectedChatId}
                 onClick={() => onSelectChat(chat.id)}
               />

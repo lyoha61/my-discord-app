@@ -16,6 +16,7 @@ import { User } from 'src/common/decorators/user.decorator';
 import { CreatePrivateChatDto } from './dto/create-private-chat.dto';
 import { ChatResponse, PrivateChatsResponse } from 'shared/types/chat';
 import { UsersResponse } from 'shared/types/user';
+import { ChatResponseDto } from './dto/chat-response.dto';
 
 @Controller('chats')
 @UseGuards(JwtAuthGuard)
@@ -32,13 +33,25 @@ export class ChatController {
 	async getOrCreatePrivateChat(
 		@User('id') currentUserId: number,
 		@Body() body: CreatePrivateChatDto,
-	) {
+	): Promise<ChatResponseDto> {
 		const { user_id: companionUserId } = body;
+
 		const chat = await this.chatService.getOrCreatePrivateChat(
 			currentUserId,
 			companionUserId,
 		);
-		return chat;
+
+		return {
+			id: chat.id,
+			created_at: chat.created_at.toISOString(),
+			members: chat.members.map((member) => {
+				return {
+					id: member.user_id,
+					username: member.user.username,
+					name: member.user.name,
+				}
+			})
+		};
 	}
 
 	@Get()

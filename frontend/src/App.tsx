@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RegisterPage from './pages/Register';
 import AuthChoice from './pages/AuthChoice';
-import HomePage from './pages/HomePage';
 import LoginPage from './pages/Login';
 import { SocketProvider } from './context/SocketProvider';
+import { HomePage } from "src/pages/HomePage.tsx";
 
 
 function App() {

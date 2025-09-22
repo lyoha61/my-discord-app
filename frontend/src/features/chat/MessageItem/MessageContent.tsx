@@ -39,20 +39,18 @@ export const MessageContent: React.FC<MessageContentProps> = ({
 
   useEffect(() => {
     const el = messageTextRef.current;
-    if (!el) return;
+    if (!el || msg.read_at) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting && !isCurrentUser) {
-            (async () => {
               try {
-                await readMessage({id: msg.id});
+                readMessage({id: msg.id});
                 observer.unobserve(el);
               } catch (err) {
                 console.error(err);
               }
-            })();
           }
         })
       },

@@ -33,14 +33,21 @@ export class ChatService {
 		return chat;
 	}
 
-	async getOrCreatePrivateChat(currentUserId: number, companionUserId: number) {
+	async getOrCreatePrivateChat(
+		currentUserId: number,
+		companionUserId: number,
+	): Promise<Chat & { members: (ChatMember & { user: User })[] }> {
 		let chat = await this.prisma.chat.findFirst({
 			where: {
 				members: {
 					every: { user_id: { in: [currentUserId, companionUserId] } },
 				},
 			},
-			include: { members: true },
+			include: {
+				members: {
+					include: {user: true,}
+				},
+			},
 		});
 
 		if (!chat) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSocketContext } from "../../context/SocketContext";
 import type { ClientMessage } from "shared/types/message";
 import { getMessages } from "../../services/messageService";
@@ -9,7 +9,7 @@ import { MessageItem } from "./MessageItem/MessageItem";
 import { ChatInput } from "./ChatInput";
 import { EVENTS } from "shared/types/websocket/events";
 import { ChatHeader } from "./ChatHeader";
-import type { WsMessageBase } from "shared/types/websocket/message";
+import type {WsMessageBase, WsMessageRead} from "shared/types/websocket/message";
 
 const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
@@ -57,8 +57,19 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 			)
 		})
 
+    chatSocket.on(EVENTS.MESSAGE_READ, (readMsg: WsMessageRead) => {
+     setMessages(prev =>
+       prev.map(msg =>
+         msg.id === readMsg.id
+         ? { ...msg, read_at: readMsg.read_at }
+         : msg
+       ))
+    })
+
 		return () => {
 			chatSocket.off(EVENTS.MESSAGE_NEW);
+      chatSocket.off(EVENTS.MESSAGE_DELETE);
+      chatSocket.off(EVENTS.MESSAGE_UPDATE);
 		}
 	}, [chatSocket, chatId]);
 
