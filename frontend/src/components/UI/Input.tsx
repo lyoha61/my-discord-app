@@ -6,14 +6,18 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
+  labelClassName?: string;
 }
 
-const Input: React.FC<InputProps> = ({ 
+export const Input: React.FC<InputProps> = ({
   id,
   label, 
   error, 
   icon,
+  iconPosition = 'left',
   className,
+  labelClassName,
   ...props 
 }) => {
   const baseClass = 
@@ -25,7 +29,10 @@ const Input: React.FC<InputProps> = ({
     <div className="">
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <div className={`absolute top-1/2 transform -translate-y-1/2  text-gray-400 fill-current ${
+              iconPosition === 'left' ? 'left-3' : 'right-3'
+            }`}
+          >
             {icon}
           </div>
         )}
@@ -38,7 +45,11 @@ const Input: React.FC<InputProps> = ({
 							"peer",
               baseClass,
 							focusClass,
-							{ 'border-red-500/50 focus:ring-red-500': error, 'pl-10': icon },
+							{
+                'border-red-500/50 focus:ring-red-500': error,
+                'pl-10': icon && iconPosition === 'left',
+                'pr-10': icon && iconPosition === 'right'
+              },
 							className
           )}
 					
@@ -47,12 +58,13 @@ const Input: React.FC<InputProps> = ({
 				<label 
 					htmlFor={id}
 					className={cn(
-            "absolute left-1 text-xs top-2 px-2 -translate-y-7 text-gray-400 dark:text-gray-400 duration-300 transform",
+            "absolute left-1 text-xs top-2 px-2 -translate-y-7 duration-300 transform",
             "peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm",
-            "peer-focus:top-2 peer-focus:-translate-y-7  peer-focus:text-xs peer-focus:text-white",
+            "peer-focus:top-2 peer-focus:-translate-y-7  peer-focus:text-xs",
             {
-              "left-2 peer-placeholder-shown:left-8 peer-focus:left-2": icon
-            }
+              "left-2 peer-placeholder-shown:left-8 peer-focus:left-2": icon && iconPosition === 'left'
+            },
+            labelClassName
           )}>
             {label}
 				</label>
@@ -65,5 +77,3 @@ const Input: React.FC<InputProps> = ({
     </div>
   );
 };
-
-export default Input;

@@ -1,4 +1,4 @@
-import Input from "../../components/UI/Input.js";
+import { Input } from "../../components/UI/Input.js";
 import { UserSearch } from "./UserSearch.js";
 import AddIcon from "../../assets/icons/add-white.png";
 import searchIcon from "../../assets/icons/search.png";

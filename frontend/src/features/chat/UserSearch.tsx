@@ -1,4 +1,4 @@
-import Input from "../../components/UI/Input"
+import { Input } from "../../components/UI/Input"
 import SearchIcon from "../../assets/icons/search.png";
 import React, { useEffect, useRef, useState } from "react";
 import { getUsers } from "src/services/userService";
