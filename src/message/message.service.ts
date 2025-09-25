@@ -11,8 +11,8 @@ export class MessageService {
 	constructor(private prisma: PrismaService) {}
 
 	protected async findMessage(
-		messageId: number,
-		authorId: number,
+		messageId: string,
+		authorId: string,
 	): Promise<Message | null> {
 		const message = await this.prisma.message.findFirst({
 			where: {
@@ -24,7 +24,7 @@ export class MessageService {
 		return message;
 	}
 
-	async readMessage(messageId: number): Promise<MessageWithReadAt> {
+	async readMessage(messageId: string): Promise<MessageWithReadAt> {
 		const message = await this.prisma.message.update({
 			where: { id: messageId },
 			data: { read_at: new Date() }
@@ -33,7 +33,7 @@ export class MessageService {
 		return message as MessageWithReadAt;
 	}
 
-	async getMessage(messageId: number, userId: number) {
+	async getMessage(messageId: string, userId: string) {
 		try {
 			const message = await this.findMessage(messageId, userId);
 
@@ -48,7 +48,7 @@ export class MessageService {
 	}
 
 	async getPrivateChatMessages(
-		chatId: number,
+		chatId: string,
 		query: GetMessagesDto,
 	): Promise<MessageWithAuthor[]> {
 		const { sort = 'asc' } = query;
@@ -69,8 +69,8 @@ export class MessageService {
 
 	async storeMessage(
 		text: string,
-		userId: number,
-		chatId: number,
+		userId: string,
+		chatId: string,
 	): Promise<MessageWithAuthor> {
 		try {
 			if (!text || !userId || !chatId)
@@ -117,14 +117,14 @@ export class MessageService {
 
 	async updateMessage(
 		text: string,
-		messageId: number,
-		userId: number,
+		messageId: string,
+		userId: string,
 	) {
 		try {
 			const message = await this.findMessage(messageId, userId);
 			if (!message)
 				throw new NotFoundException(
-					`Message with id: ${messageId} not found or you not athor`,
+					`Message with id: ${messageId} not found or you not author`,
 				);
 
 			const updatedMessage = await this.prisma.message.update({
@@ -147,7 +147,7 @@ export class MessageService {
 		}
 	}
 
-	async destroyMessage(messageId: number, userId: number): Promise<void> {
+	async destroyMessage(messageId: string, userId: string): Promise<void> {
 		try {
 			const result = await this.prisma.message.delete({
 				where: {

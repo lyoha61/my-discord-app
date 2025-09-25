@@ -4,5 +4,5 @@ export class CreateChatDto {
 	@IsArray()
 	@ArrayNotEmpty()
 	@IsInt({ each: true })
-	user_ids: number[];
+	user_ids: string[];
 }

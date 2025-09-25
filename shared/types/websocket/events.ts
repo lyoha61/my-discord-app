@@ -49,6 +49,6 @@ export interface ServerToClientEvents {
 
 	[EVENTS.TOKEN_EXPIRED]: () => void;
 
-	[EVENTS.ONLINE_USER_LIST]: (data: number[]) => void;
-	[EVENTS.USER_STATUS_CHANGED]:(data: {userId: number; status: UserStatus}) => void;
+	[EVENTS.ONLINE_USER_LIST]: (data: string[]) => void;
+	[EVENTS.USER_STATUS_CHANGED]:(data: {userId: string; status: UserStatus}) => void;
 }

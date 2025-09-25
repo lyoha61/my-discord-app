@@ -1,12 +1,12 @@
 import type { UserStatus } from "shared/types/websocket/events";
 
 export interface MemberPrivateChat {
-	id: number;
+	id: string;
 	username: string;
 }
 
 export interface ChatResponse {
-	id: number;
+	id: string;
 	created_at: string;
 	members: MemberPrivateChat[];
 }
@@ -16,6 +16,6 @@ export interface PrivateChatsResponse {
 }
 
 export interface UserStatusPayload {
-	userId: number;
+	userId: string;
 	status: UserStatus;
 }

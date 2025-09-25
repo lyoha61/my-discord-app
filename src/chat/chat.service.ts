@@ -8,7 +8,7 @@ export class ChatService {
 
 	constructor(private readonly prisma: PrismaService) {}
 
-	private async existingUsers(userIds: number[]): Promise<void> {
+	private async existingUsers(userIds: string[]): Promise<void> {
 		const existingUsers = await this.prisma.user.findMany({
 			where: { id: { in: userIds } },
 		});
@@ -22,7 +22,7 @@ export class ChatService {
 		}
 	}
 
-	async getChat(chatId: number) {
+	async getChat(chatId: string) {
 		const chat = await this.prisma.chat.findUnique({
 			where: { id: chatId },
 			include: { members: true, messages: true },
@@ -34,8 +34,8 @@ export class ChatService {
 	}
 
 	async getOrCreatePrivateChat(
-		currentUserId: number,
-		companionUserId: number,
+		currentUserId: string,
+		companionUserId: string,
 	): Promise<Chat & { members: (ChatMember & { user: User })[] }> {
 		let chat = await this.prisma.chat.findFirst({
 			where: {
@@ -57,9 +57,7 @@ export class ChatService {
 		return chat;
 	}
 
-	async getPrivateChats(
-		userId: number,
-	): Promise<(Chat & { members: (ChatMember & { user: User })[] })[]> {
+	async getPrivateChats(userId: string): Promise<(Chat & { members: (ChatMember & { user: User })[] })[]> {
 		const chats = await this.prisma.chat.findMany({
 			where: {
 				members: {
@@ -74,7 +72,7 @@ export class ChatService {
 		return chats;
 	}
 
-	async getPrivateChatMembers(chatId: number): Promise<User[] | null> {
+	async getPrivateChatMembers(chatId: string): Promise<User[] | null> {
 		const chatMembers = await this.prisma.chatMember.findMany({
 			where: { chat_id: chatId },
 			include: {
@@ -85,7 +83,7 @@ export class ChatService {
 		return members ? members : null;
 	}
 
-	async createChat(userIds: number[]) {
+	async createChat(userIds: string[]) {
 		const chat = await this.prisma.$transaction(async (tx) => {
 			const chat = await tx.chat.create({
 				data: {},
@@ -119,7 +117,7 @@ export class ChatService {
 		return chat;
 	}
 
-	async addMembers(chatId: number, userIds: number[]) {
+	async addMembers(chatId: string, userIds: string[]) {
 		const chat = await this.prisma.chat.findUnique({
 			where: {
 				id: chatId,
@@ -138,5 +136,9 @@ export class ChatService {
 		this.logger.log(`Members added in chat ${chatId}`);
 
 		return { success: true, addedUsers: userIds };
+	}
+
+	uploadFile(chatId: string) {
+		return chatId;
 	}
 }

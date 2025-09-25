@@ -13,7 +13,7 @@ import { ClientToServerEvents, EVENTS, ServerToClientEvents, USER_STATUS } from 
 import {
 	mapMessageReadToClient,
 	mapMessageToClient,
-	mapMessageToClientWithAutor,
+	mapMessageToClientWithAuthor,
 } from 'shared/utils/messageMapper';
 import type { WsMessageBase, WsMessageNew, WsMessageUpdate } from 'shared/types/websocket/message';
 import type { ChatSocket, JwtPayload } from 'shared/types/websocket/socket';
@@ -28,7 +28,7 @@ export class ChatGateway {
 	server: Server<ClientToServerEvents, ServerToClientEvents>
 
 	private readonly logger = new Logger(ChatGateway.name);
-	private onlineUsers = new Map<number, string>();
+	private onlineUsers = new Map<string, string>();
 
 	constructor(
 		private readonly messageService: MessageService,
@@ -36,7 +36,7 @@ export class ChatGateway {
 	) {}
 
 	afterInit() {
-		this.logger.log('WebSocket Server Initialized', { userId: 3 });
+		this.logger.log('WebSocket Server Initialized');
 	}
 
 	handleConnection(client: ChatSocket) {
@@ -48,7 +48,7 @@ export class ChatGateway {
 		}
 
 		try {
-			const payload = this.jwtService.verify<JwtPayload>(authData.access_token);
+		const payload = this.jwtService.verify<JwtPayload>(authData.access_token);
 			client.data.user = { id: payload.sub };
 			this.onlineUsers.set(payload.sub, client.id);
 
@@ -102,7 +102,7 @@ export class ChatGateway {
 				payload.chat_id,
 			);
 
-			const formattedMessage = mapMessageToClientWithAutor(msg);
+			const formattedMessage = mapMessageToClientWithAuthor(msg);
 
 			this.server.emit(EVENTS.MESSAGE_NEW, {
 				...formattedMessage,

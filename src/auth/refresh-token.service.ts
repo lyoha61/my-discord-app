@@ -3,7 +3,7 @@ import { redisClient } from 'src/common/decorators/redis/redis.client';
 
 @Injectable()
 export class RefreshTokenService {
-	async setToken(userId: number, token: string): Promise<string> {
+	async setToken(userId: string, token: string): Promise<string> {
 		return await redisClient.set(
 			`refresh_token:${userId}`,
 			token,
@@ -12,7 +12,7 @@ export class RefreshTokenService {
 		);
 	}
 
-	async saveToken(userId: number, token: string): Promise<void> {
+	async saveToken(userId: string, token: string): Promise<void> {
 		await redisClient.set(
 			`refresh_token:${userId}`,
 			token,
@@ -21,15 +21,15 @@ export class RefreshTokenService {
 		);
 	}
 
-	async getToken(userId: number): Promise<string | null> {
+	async getToken(userId: string): Promise<string | null> {
 		return await redisClient.get(`refresh_token:${userId}`);
 	}
 
-	async deleteToken(userId: number): Promise<void> {
+	async deleteToken(userId: string): Promise<void> {
 		await redisClient.del(`refresh_token:${userId}`);
 	}
 
-	async isTokenValid(userId: number, token: string): Promise<boolean> {
+	async isTokenValid(userId: string, token: string): Promise<boolean> {
 		const originToken = await this.getToken(userId);
 
 		return originToken === token;

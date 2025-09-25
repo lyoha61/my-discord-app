@@ -2,7 +2,7 @@ import { Message } from "@prisma/client";
 import { ClientMessage, ClientMessageBase, ClientMessageRead } from "shared/types/message";
 import { MessageWithAuthor, MessageWithReadAt } from "src/message/types/message";
 
-export const mapMessageToClientWithAutor = (
+export const mapMessageToClientWithAuthor = (
 	msg: MessageWithAuthor,
 ): ClientMessage => {
 	const { author, ...rest } = msg;

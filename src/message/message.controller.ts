@@ -8,7 +8,6 @@ import {
 	Logger,
 	Get,
 	Param,
-	ParseIntPipe,
 	Delete,
 	Patch,
 	Query,
@@ -31,8 +30,8 @@ export class MessageController {
 
 	@Get('/:messageId')
 	async getMessage(
-		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number,
+		@User('id') userId: string,
+		@Param('messageId') messageId: string,
 	) {
 		this.logger.log(`Пользователь с id: ${userId} запросил ресурс`);
 		const message = await this.messagesService.getMessage(messageId, userId);
@@ -41,7 +40,7 @@ export class MessageController {
 
 	@Get()
 	async getPrivateChatMessages(
-		@Param('chatId', ParseIntPipe) chatId: number,
+		@Param('chatId') chatId: string,
 		@Query() query: GetMessagesDto,
 	): Promise<MessagesResponseRest> {
 		const messages = await this.messagesService.getPrivateChatMessages(
@@ -66,8 +65,8 @@ export class MessageController {
 	@HttpCode(HttpStatus.CREATED)
 	async storeMessage(
 		@Body() body: CreateMessageDto,
-		@Param('chatId', ParseIntPipe) chatId: number,
-		@User('id') userId: number,
+		@Param('chatId') chatId: string,
+		@User('id') userId: string,
 	) {
 		const { text } = body;
 		const message = await this.messagesService.storeMessage(
@@ -81,8 +80,8 @@ export class MessageController {
 	@Patch('/:messageId')
 	async updateMessage(
 		@Body() body: UpdateMessageDto,
-		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number,
+		@User('id') userId: string,
+		@Param('messageId') messageId: string,
 	) {
 		const { text } = body;
 
@@ -97,8 +96,8 @@ export class MessageController {
 
 	@Delete('/:messageId')
 	async destroyMessage(
-		@User('id') userId: number,
-		@Param('messageId', ParseIntPipe) messageId: number,
+		@User('id') userId: string,
+		@Param('messageId') messageId: string,
 	) {
 		await this.messagesService.getMessage(messageId, userId);
 

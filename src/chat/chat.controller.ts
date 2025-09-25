@@ -4,7 +4,6 @@ import {
 	Get,
 	NotFoundException,
 	Param,
-	ParseIntPipe,
 	Post,
 	UseGuards,
 } from '@nestjs/common';
@@ -24,14 +23,16 @@ export class ChatController {
 	constructor(private readonly chatService: ChatService) {}
 
 	@Get(':chatId')
-	async getChat(@Param('chatId', ParseIntPipe) chatId: number) {
+	async getChat(
+		@Param('chatId') chatId: string,
+	) {
 		const chat = await this.chatService.getChat(chatId);
 		return chat;
 	}
 
 	@Post('private')
 	async getOrCreatePrivateChat(
-		@User('id') currentUserId: number,
+		@User('id') currentUserId: string,
 		@Body() body: CreatePrivateChatDto,
 	): Promise<ChatResponseDto> {
 		const { user_id: companionUserId } = body;
@@ -56,7 +57,7 @@ export class ChatController {
 
 	@Get()
 	async getPrivateChats(
-		@User('id') userId: number,
+		@User('id') userId: string,
 	): Promise<PrivateChatsResponse> {
 		const chats = await this.chatService.getPrivateChats(userId);
 
@@ -76,7 +77,7 @@ export class ChatController {
 
 	@Get(':chatId/members/')
 	async getPrivateChatMembers(
-		@Param('chatId', ParseIntPipe) chatId: number,
+		@Param('chatId') chatId: string,
 	): Promise<UsersResponse> {
 		const users = await this.chatService.getPrivateChatMembers(chatId);
 
@@ -102,10 +103,17 @@ export class ChatController {
 	@Post(':chatId/members')
 	async addMembers(
 		@Body() body: AddMemberChatDto,
-		@Param('chatId', ParseIntPipe) chatId: number,
+		@Param('chatId') chatId: string,
 	) {
 		const { user_ids: userIds } = body;
 		const result = this.chatService.addMembers(chatId, userIds);
 		return result;
+	}
+
+	@Post(':chatId/files/upload')
+	uploadFile(
+		@Body() body: { file: File },
+	) {
+		return body;
 	}
 }

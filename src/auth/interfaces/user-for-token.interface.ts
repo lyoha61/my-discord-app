@@ -1,4 +1,4 @@
 export interface UserForToken {
-	id: number;
+	id: string;
 	username?: string;
 }

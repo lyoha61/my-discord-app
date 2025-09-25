@@ -19,9 +19,7 @@ const isTokenResponse = (data: unknown): data is TokensResponse => {
 }
 
 export const saveTokens = (data: TokensResponse): void => {
-	console.log('Enter savetokens')
-	console.log(data)
-	accessToken = data.access_token;
+  accessToken = data.access_token;
 	localStorage.setItem('access_token', accessToken);
 
 	if(data.refresh_token) {

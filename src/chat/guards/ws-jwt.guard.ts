@@ -22,7 +22,7 @@ export class WsJwtGuard implements CanActivate {
 		try {
 			if (!token) throw new WsException('Token is missing');
 
-			const payload = this.jwtService.verify<{ sub: number }>(token);
+			const payload = this.jwtService.verify<{ sub: string }>(token);
 			client.data.user = { id: payload.sub };
 			return true;
 		} catch (err) {

@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 
 export class UserDto {
-	id: number;
+	id: string;
 	email: string;
 	name: string | null;
 	username: string;

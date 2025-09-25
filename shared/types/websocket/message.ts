@@ -1,10 +1,10 @@
 export interface WsMessageBase {
-  id: number;
+  id: string;
 }
 
 export interface WsMessageNew {
 	text: string;
-	chat_id: number;
+	chat_id: string;
 }
 
 export interface WsMessageUpdate extends WsMessageBase {

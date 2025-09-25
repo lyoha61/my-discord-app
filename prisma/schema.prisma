@@ -7,24 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id       Int        @id @default(autoincrement())
-  username String
-  name     String?
-  email    String     @unique
-  password String
-  messages Message[]
-  updated_at DateTime @default(now())
-  created_at DateTime @default(now())
+  id           String          @id @default(uuid())
+  username     String
+  name         String?
+  email        String       @unique
+  password     String
+  messages     Message[]
+  updated_at   DateTime     @default(now())
+  created_at   DateTime     @default(now())
   chat_members ChatMember[]
 
   @@map("users")
 }
 
 model Chat {
-  id         Int       @id @default(autoincrement())
-  created_at DateTime  @default(now())
+  id         String          @id @default(uuid())
+  created_at DateTime     @default(now())
   messages   Message[]
   members    ChatMember[]
 
@@ -32,26 +31,42 @@ model Chat {
 }
 
 model Message {
-  id              Int          @id @default(autoincrement())
-  text            String
-  updated_at      DateTime     @default(now())
-  created_at      DateTime     @default(now())
-  read_at         DateTime?     
-  author          User         @relation(fields: [author_id], references: [id])
-  author_id       Int
-  chat            Chat         @relation(fields: [chat_id], references: [id])
-  chat_id Int 
+  id         String    @id @default(uuid())
+  text       String
+  updated_at DateTime  @default(now())
+  created_at DateTime  @default(now())
+  read_at    DateTime?
+  author     User      @relation(fields: [author_id], references: [id])
+  author_id  String
+  chat       Chat      @relation(fields: [chat_id], references: [id])
+  chat_id    String
+  file       File[]    @relation("MessageFiles")
 
   @@map("messages")
 }
 
 model ChatMember {
-  id      Int  @id @default(autoincrement())
+  id      String  @id @default(uuid())
   chat    Chat @relation(fields: [chat_id], references: [id], onDelete: Cascade)
-  chat_id Int
+  chat_id String
   user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id Int
+  user_id String
 
   @@unique([chat_id, user_id])
   @@map("chats_members")
+}
+
+model File {
+  id         String   @id @default(uuid())
+  userId     String?
+  bucket     String
+  key        String
+  url        String
+  filename   String
+  mimetype   String
+  size       Int
+  type       String
+  message    Message? @relation("MessageFiles", fields: [messageId], references: [id])
+  messageId  String?
+  created_at DateTime @default(now())
 }

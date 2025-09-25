@@ -1,11 +1,11 @@
 export interface ChatMemberDto {
-	id: number;
+	id: string;
 	username: string;
 	name: string | null;
 }
 
 export interface ChatResponseDto {
-	id: number;
+	id: string;
 	created_at: string;
 	members: ChatMemberDto[];
 }

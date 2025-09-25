@@ -1,5 +1,5 @@
 export interface User {
-	id: number;
+	id: string;
 	username: string;
 	name?: string;
 	email: string;
@@ -15,7 +15,7 @@ export interface TokensResponse extends AccessTokenResponse {
 }
 
 export interface RefreshAccessTokenResponse extends AccessTokenResponse {
-	user_id: number;
+	user_id: string;
 }
 
 export interface SocketAuth {

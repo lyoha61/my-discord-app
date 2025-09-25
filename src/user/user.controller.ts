@@ -3,7 +3,6 @@ import {
 	Get,
 	Logger,
 	Param,
-	ParseIntPipe,
 	UseFilters,
 	UseGuards,
 } from '@nestjs/common';
@@ -35,7 +34,7 @@ export class UserController {
 	}
 
 	@Get('/me')
-	async getMe(@User('id') userId: number): Promise<UserResponse> {
+	async getMe(@User('id') userId: string): Promise<UserResponse> {
 		const user = await this.userService.getMe(userId);
 
 		return { user: this.formattedUser(user) };
@@ -43,7 +42,7 @@ export class UserController {
 
 	@Get(':userId')
 	async getUser(
-		@Param('userId', ParseIntPipe) userId: number,
+		@Param('userId') userId: string,
 	): Promise<UserResponse> {
 		const user = await this.userService.getUser(userId);
 
@@ -51,7 +50,7 @@ export class UserController {
 	}
 
 	@Get()
-	async getUsers(@User('id') currentUserId: number): Promise<UsersResponse> {
+	async getUsers(@User('id') currentUserId: string): Promise<UsersResponse> {
 		const users = await this.userService.getUsers();
 
 		const filteredUsers = users

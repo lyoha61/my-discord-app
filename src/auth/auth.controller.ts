@@ -65,16 +65,14 @@ export class AuthController {
 		return true;
 	}
 
-	private getUserFromToken(refreshToken: string): number {
+	private getUserFromToken(refreshToken: string): string {
 		const payload = jwt.verify(refreshToken, this.REFRESH_SECRET) as JwtPayload;
 
 		if (!payload.sub) {
 			throw new Error('No subject (sub) in token');
 		}
 
-		const userId = Number(payload.sub);
-
-		return userId;
+		return payload.sub;
 	}
 
 	private generateToken(user: UserForToken, expiresIn: string): string {
@@ -150,7 +148,7 @@ export class AuthController {
 	@UseGuards(JwtAuthGuard)
 	@Post('/logout')
 	async logout(
-		@UserDecorator('id') userId: number,
+		@UserDecorator('id') userId: string,
 	): Promise<{ success: boolean }> {
 		await this.refreshTokenService.deleteToken(userId);
 

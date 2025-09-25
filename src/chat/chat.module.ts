@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
 import { MessageModule } from 'src/message/message.module';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';

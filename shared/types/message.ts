@@ -1,10 +1,10 @@
 export interface Message {
-	id: number;
+	id: string;
 	text: string;
 	updated_at: Date;
 	created_at: Date;
-	author_id: number;
-	chat_id: number;
+	author_id: string;
+	chat_id: string;
 }
 
 export type ClientMessageBase = Omit<Message, "created_at" | "updated_at" | "read_at"> & {
@@ -26,7 +26,7 @@ export interface MessageNewEvent extends ClientMessage {
 }
 
 export interface MessageDelEvent {
-	messageId: number;
+	messageId: string;
 }
 
 export interface MessageUpdateEvent extends Omit<ClientMessage, "author_name"> {

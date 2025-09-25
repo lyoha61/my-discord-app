@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 import { ClientToServerEvents, ServerToClientEvents } from './events';
 
 export interface JwtPayload {
-	sub: number;
+	sub: string;
 	iat?: number;
 	exp?: number;
 }
@@ -12,7 +12,7 @@ interface SocketAuth {
 }
 
 interface ChatSocketData {
-	user: {id: number}
+	user: {id: string}
 }
 
 export type ChatSocket = Socket<
@@ -21,5 +21,5 @@ export type ChatSocket = Socket<
 	any, 
 	ChatSocketData
 > & {
-	handshake: Socket['handshake'] & { auth:  SocketAuth}
+	handshake: Socket['handshake'] & { auth: SocketAuth }
 }
