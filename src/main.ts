@@ -6,10 +6,10 @@ import { CustomLogger } from './logger/custom-logger';
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule, {
 		bufferLogs: true,
-		logger: false,
+		logger: new CustomLogger(),
 	});
 
-	app.useLogger(new CustomLogger());
+	app.flushLogs()
 
 	app.setGlobalPrefix('api/v1')
 

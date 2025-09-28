@@ -7,7 +7,14 @@ export class CustomLogger implements LoggerService {
 	}
 
 	error(message: any, trace?: string, context?: string) {
-		logger.error({ context, trace }, message);
+		let msg: string;
+		if (message instanceof Error) {
+			msg = message.message;
+			trace = message.stack;
+		} else {
+			msg = String(message);
+		}
+		logger.error({ context, trace }, msg);
 	}
 
 	warn(message: any, context?: string) {

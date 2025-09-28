@@ -9,6 +9,7 @@ import { envSchema } from './config/config.module';
 import { ChatModule } from './chat/chat.module';
 import { UserModule } from './user/user.module';
 import { LoggingMiddleware } from './middlewares/logging.middleware';
+import { S3Module } from './s3/s3.module';
 
 @Module({
 	imports: [
@@ -21,6 +22,7 @@ import { LoggingMiddleware } from './middlewares/logging.middleware';
 		AuthModule,
 		ChatModule,
 		UserModule,
+		S3Module,
 	],
 	controllers: [AppController],
 	providers: [AppService],

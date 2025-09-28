@@ -138,7 +138,4 @@ export class ChatService {
 		return { success: true, addedUsers: userIds };
 	}
 
-	uploadFile(chatId: string) {
-		return chatId;
-	}
 }
