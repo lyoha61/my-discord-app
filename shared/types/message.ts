@@ -17,8 +17,14 @@ export type ClientMessageRead = Omit<Message, "read_at"> & {
 	read_at: string;
 };
 
+export interface ClientFile {
+	id: string;
+	url: string;
+}
+
 export interface ClientMessage extends ClientMessageBase {
 	author_name: string;
+	file?: ClientFile[];
 }
 
 export interface MessageNewEvent extends ClientMessage {

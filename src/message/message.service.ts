@@ -2,7 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetMessagesDto } from './dto/get-messages.dto';
-import { MessageWithAuthor, MessageWithReadAt } from './types/message';
+import { MessageWithAuthor, MessageWithReadAt, UpdateMessageInput } from './types/message';
+import { UploadFile } from 'src/chat/types/uploadFile';
 
 @Injectable()
 export class MessageService {
@@ -58,6 +59,7 @@ export class MessageService {
 			},
 			include: {
 				author: true,
+				file: true,
 			},
 			orderBy: { created_at: sort },
 		});
@@ -73,12 +75,12 @@ export class MessageService {
 		chatId: string,
 	): Promise<MessageWithAuthor> {
 		try {
-			if (!text || !userId || !chatId)
+			if (!userId || !chatId)
 				throw new Error('Invalid input data for saving message');
 
 			const message = await this.prisma.message.create({
 				data: {
-					text: text,
+					text: text ?? '',
 					author: {
 						connect: {
 							id: userId,
@@ -106,20 +108,13 @@ export class MessageService {
 
 			return message;
 		} catch (err) {
-			if (err instanceof Error) {
-				this.logger.error(err.message);
-			} else {
-				this.logger.error('Error saving message');
-			}
+			this.logger.error(err instanceof Error ? err.message : 'Error saving message');
 			throw err;
 		}
 	}
 
-	async updateMessage(
-		text: string,
-		messageId: string,
-		userId: string,
-	) {
+	async updateMessage(input: UpdateMessageInput) {
+		const { text, messageId, userId, fileId } = input;
 		try {
 			const message = await this.findMessage(messageId, userId);
 			if (!message)
@@ -134,7 +129,14 @@ export class MessageService {
 				},
 				data: {
 					text,
-					updated_at: new Date()
+					updated_at: new Date(),
+					file: fileId
+						? {
+								connect:{
+									id: fileId
+								}
+							}
+						: undefined
 				},
 			});
 
@@ -163,6 +165,22 @@ export class MessageService {
 		} catch (err) {
 			this.logger.error(`Failed delete message id: ${messageId}`);
 			throw err;
+		}
+	}
+
+	async uploadFile(userId: string, messageId: string, file: UploadFile): Promise<{ id: string, url: string }> {
+		const uploadedFile = await this.prisma.file.create({
+			data: {
+				messageId: messageId,
+				userId: userId,
+				type: 'message',
+				...file
+			}
+		});
+
+		return {
+			id: uploadedFile.id,
+			url: uploadedFile.url,
 		}
 	}
 }

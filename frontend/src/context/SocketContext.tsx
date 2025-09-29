@@ -5,10 +5,10 @@ import type { ClientToServerEvents, ServerToClientEvents } from "shared/types/we
 
 export type SocketContextValue = {
 	chatSocket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
-	onlineUsers: number[];
-	sendMessage: (payload: WsMessageNew) => Promise<void>;
-	updateMessage: (payload: WsMessageUpdate) => Promise<void>;
-	deleteMessage: (payload: WsMessageBase) => Promise<void>;
+	onlineUsers: string[];
+	sendMessage: (payload: WsMessageNew) => Promise<WsMessageBase>;
+	updateMessage: (payload: WsMessageUpdate) => void;
+	deleteMessage: (payload: WsMessageBase) => void;
 	readMessage: (payload: WsMessageBase) => void;
 }
 

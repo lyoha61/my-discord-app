@@ -34,11 +34,13 @@ class HttpClient {
 		return await res.json()
 	}
 
-	async post<T>(endpoint: string, data?: Record<string, unknown>): Promise<T> {
+	async post<T>(endpoint: string, data?: Record<string, unknown> | FormData ): Promise<T> {
+		const isFormData = data instanceof FormData;
+
 		const res = await fetch(`${this.baseURL}/${endpoint}`, {
 			method: "POST",
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(data),
+			headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+			body: isFormData ? data : JSON.stringify(data),
 		});
 
 		if (!res.ok) {

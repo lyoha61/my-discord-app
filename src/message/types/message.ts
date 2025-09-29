@@ -15,3 +15,10 @@ export interface ClientMessageRest
 export interface MessagesResponseRest {
 	messages: ClientMessageRest[];
 }
+
+export interface UpdateMessageInput {
+	text?: string,
+	messageId: string,
+	userId: string,
+	fileId?: string,
+}

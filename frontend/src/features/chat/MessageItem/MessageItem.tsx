@@ -6,7 +6,7 @@ import { MessageContent } from "./MessageContent";
 
 interface MessageItemProps {
 	msg: ClientMessage;
-	currentUserId: number;
+	currentUserId: string;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -23,9 +23,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 	const containerRef = useRef<HTMLDivElement>(null);
 
 
-	const handleEditSubmit = async () => {
+	const handleEditSubmit = () => {
 		if (editText.trim() && editText !== msg.text) {
-			await updateMessage({
+			updateMessage({
 				text: editText.trim(),
 				id: msg.id,
 			});
@@ -34,9 +34,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 		setIsEditing(false);
 	}
 
-	const handleDelete = async () => {
+	const handleDelete = () => {
 		try {
-			await deleteMessage({id: msg.id})
+			deleteMessage({id: msg.id})
 		} catch (err: unknown) {
 			if (err instanceof Error) {
 				console.error(`Error delete message ${msg.id} error: ${err.message}`)

@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { ClientMessage } from "shared/types/message"
+import type { ClientFile, ClientMessage } from "shared/types/message"
 import CheckMark from "assets/icons/check-mark.svg?react";
 import {useSocketContext} from "src/context/SocketContext.tsx";
 
@@ -11,6 +11,23 @@ interface MessageContentProps {
 	setEditText: (text: string) => void;
 	onEditSubmit: () => void;
 }
+
+function isClientFile(obj: unknown): obj is ClientFile {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    typeof (obj as { id: unknown }).id === 'string' &&
+    'url' in obj &&
+    typeof (obj as { url: unknown }).url === 'string'
+  );
+}
+
+function getSafeFiles(files?: unknown): ClientFile[] {
+  if (!Array.isArray(files)) return [];
+  return files.filter(isClientFile);
+}
+
 
 export const MessageContent: React.FC<MessageContentProps> = ({
 	msg,
@@ -29,6 +46,8 @@ export const MessageContent: React.FC<MessageContentProps> = ({
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const hiddenSpanRef = useRef<HTMLSpanElement>(null);
+
+	const files = getSafeFiles(msg.file);
 
 	const time = new Date(msg.created_at).toLocaleTimeString([], {
 		hour: '2-digit', 
@@ -123,6 +142,10 @@ export const MessageContent: React.FC<MessageContentProps> = ({
 
 					<div className="flex-1" ref={messageTextRef}>
 						{msg.text}
+						{files.map(f => (
+									<img key={f.id} src={f.url} alt="Picture" />
+								))
+						}
 					</div>
 
 					{/* Add info message  */}

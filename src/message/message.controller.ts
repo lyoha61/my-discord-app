@@ -9,24 +9,48 @@ import {
 	Get,
 	Param,
 	Delete,
-	Patch,
 	Query,
+	UploadedFile,
+	UseInterceptors,
+	BadRequestException,
 } from '@nestjs/common';
-import type { Request } from 'express';
 import CreateMessageDto from './dto/create-message.dto';
 import { User } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import UpdateMessageDto from './dto/update-message.dto';
 import { MessageService } from './message.service';
 import { GetMessagesDto } from './dto/get-messages.dto';
-import { MessagesResponseRest } from './types/message';
+import { MessagesResponseRest, MessageWithAuthor } from './types/message';
+import type { Express } from 'express';
+import { S3Service } from 'src/s3/s3.service';
+import { Buckets } from 'src/common/constants/buckets';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadFile } from 'src/chat/types/uploadFile';
+import { FileInfo } from 'shared/types/file';
 
 @Controller('chats/:chatId/messages')
 @UseGuards(JwtAuthGuard)
 export class MessageController {
 	private readonly logger = new Logger(MessageController.name);
 
-	constructor(private readonly messagesService: MessageService) {}
+	constructor(
+		private readonly messagesService: MessageService,
+		private readonly s3Service: S3Service,
+	) {}
+
+	private isValidFile(file: unknown): file is Express.Multer.File {
+		if (!file || typeof file !== 'object') return false;
+
+		return (
+			'originalname' in file &&
+			typeof file.originalname === 'string' &&
+			'buffer' in file &&
+			file.buffer instanceof Buffer &&
+			'mimetype' in file &&
+			typeof file.mimetype === 'string' &&
+			'size' in file &&
+			typeof file.size === 'number'
+		);
+	}
 
 	@Get('/:messageId')
 	async getMessage(
@@ -61,37 +85,52 @@ export class MessageController {
 		return { messages: formattedMessages };
 	}
 
+	@Post(':messageId/file')
+	@UseInterceptors(FileInterceptor('file'))
+	async uploadFile(
+		@Param('messageId') messageId: string,
+		@User('id') userId: string,
+		@UploadedFile() file?: Express.Multer.File,
+	): Promise<{ file: FileInfo | null,}> {
+		let uploadedFile: { id: string, url: string } | null = null;
+
+		if (!file) throw new BadRequestException('File is required');
+
+		const { originalname, buffer, mimetype, size } = file;
+
+		const key = `${messageId}-${originalname}`;
+		const url = await this.s3Service.uploadFile(Buckets.APP, key, buffer);
+
+		const fileData: UploadFile = {
+				key,
+				url,
+				bucket: Buckets.APP,
+				filename: originalname,
+				size,
+				mimetype,
+		}
+
+		uploadedFile = await this.messagesService.uploadFile(userId, messageId, fileData);
+
+		return { file: uploadedFile };
+	}
+
+
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
-	async storeMessage(
+	@UseInterceptors(FileInterceptor('file')) 
+	async sendMessage(
 		@Body() body: CreateMessageDto,
 		@Param('chatId') chatId: string,
 		@User('id') userId: string,
-	) {
+	): Promise<{ message: MessageWithAuthor }> {
 		const { text } = body;
 		const message = await this.messagesService.storeMessage(
 			text,
 			userId,
 			chatId,
 		);
-		return message;
-	}
-
-	@Patch('/:messageId')
-	async updateMessage(
-		@Body() body: UpdateMessageDto,
-		@User('id') userId: string,
-		@Param('messageId') messageId: string,
-	) {
-		const { text } = body;
-
-		const updatedMessage = await this.messagesService.updateMessage(
-			text,
-			messageId,
-			userId,
-		);
-
-		return updatedMessage;
+		return { message };
 	}
 
 	@Delete('/:messageId')

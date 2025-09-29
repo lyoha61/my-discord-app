@@ -8,7 +8,7 @@ import type { WsMessageBase, WsMessageNew, WsMessageUpdate } from "shared/types/
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [chatSocket, setChatSocket] = useState<Socket | null>(null);
-	const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
+	const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 	const pendingMessageRef = useRef<unknown>(null);
 	
 	useEffect(() => {
@@ -38,7 +38,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 			})
 		})
 
-		socket.on(EVENTS.ONLINE_USER_LIST, (ids: number[]) => {
+		socket.on(EVENTS.ONLINE_USER_LIST, (ids: string[]) => {
 			setOnlineUsers(ids);
 		})
 
@@ -52,18 +52,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	}, []);
 
 
-	const sendMessage = async (payload: WsMessageNew) => {
-		if (!chatSocket) return;
-
+	const sendMessage = (payload: WsMessageNew) => {
+		if (!chatSocket) {
+			return Promise.reject(new Error('No socket connection'));
+		};
 		pendingMessageRef.current = payload;
-		chatSocket.emit(EVENTS.MESSAGE_NEW, payload);
+		return new Promise<WsMessageBase>(res => {
+			chatSocket.emit(EVENTS.MESSAGE_NEW, payload, (savedMessage: WsMessageBase) => {
+				res(savedMessage);
+				pendingMessageRef.current = null;
+			});
+		})
 	}
 
-	const updateMessage = async (payload: WsMessageUpdate) => {
+	const updateMessage = (payload: WsMessageUpdate) => {
     chatSocket?.emit(EVENTS.MESSAGE_UPDATE, payload);
   }
 
-	const deleteMessage = async (payload: WsMessageBase) => {
+	const deleteMessage = (payload: WsMessageBase) => {
     chatSocket?.emit(EVENTS.MESSAGE_DELETE, payload);
   }
 

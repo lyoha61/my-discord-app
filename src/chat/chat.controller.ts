@@ -109,11 +109,4 @@ export class ChatController {
 		const result = this.chatService.addMembers(chatId, userIds);
 		return result;
 	}
-
-	@Post(':chatId/files/upload')
-	uploadFile(
-		@Body() body: { file: File },
-	) {
-		return body;
-	}
 }

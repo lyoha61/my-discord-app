@@ -8,7 +8,8 @@ export interface WsMessageNew {
 }
 
 export interface WsMessageUpdate extends WsMessageBase {
-	text: string;
+	text?: string;
+	file_id?: string;
 }
 
 

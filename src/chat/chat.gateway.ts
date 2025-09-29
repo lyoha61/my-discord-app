@@ -94,7 +94,7 @@ export class ChatGateway {
 	async handleNewMessage(
 		client: ChatSocket,
 		payload: WsMessageNew,
-	): Promise<void> {
+	): Promise<WsMessageBase> {
 		try {
 			const msg = await this.messageService.storeMessage(
 				payload.text,
@@ -107,6 +107,9 @@ export class ChatGateway {
 			this.server.emit(EVENTS.MESSAGE_NEW, {
 				...formattedMessage,
 			});
+			
+			return {id: formattedMessage.id}
+
 		} catch (err) {
 			this.logger.error(`Error on event "${EVENTS.MESSAGE_NEW}"`);
 			throw err;
@@ -119,11 +122,12 @@ export class ChatGateway {
 		client: ChatSocket,
 		payload: WsMessageUpdate,
 	): Promise<void> {
-		const updatedMsg = await this.messageService.updateMessage(
-			payload.text,
-			payload.id,
-			client.data.user.id,
-		);
+		const updatedMsg = await this.messageService.updateMessage({
+			text: payload.text,
+			messageId: payload.id,
+			userId: client.data.user.id,
+			fileId: payload.file_id,
+		});
 
 		const {...formattedMessage} = mapMessageToClient(updatedMsg);
 
