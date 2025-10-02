@@ -5,6 +5,7 @@ export interface WsMessageBase {
 export interface WsMessageNew {
 	text: string;
 	chat_id: string;
+	file_id?: string;
 }
 
 export interface WsMessageUpdate extends WsMessageBase {
@@ -16,6 +17,8 @@ export interface WsMessageUpdate extends WsMessageBase {
 export interface WsMessageUpdateEvent extends WsMessageBase{
 	updated_at: string;
 	created_at: string;
+	file_id?: string;
+	file_url?: string;
 }
 
 export interface WsMessageRead extends WsMessageBase {

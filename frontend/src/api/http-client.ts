@@ -1,5 +1,7 @@
+import axios from "axios";
 import { API_CONFIG } from "src/config/api";
 import type { QueryParams } from "src/types/api";
+import { api } from "src/utils/fetchInterceptor";
 
 export interface HttpError extends Error {
 	status?: number;
@@ -34,22 +36,23 @@ class HttpClient {
 		return await res.json()
 	}
 
-	async post<T>(endpoint: string, data?: Record<string, unknown> | FormData ): Promise<T> {
+	async post<T>(
+		endpoint: string, 
+		data?: Record<string, unknown> | FormData,
+		onUploadProgress?: (progress: number) => void,
+	): Promise<T> {
 		const isFormData = data instanceof FormData;
 
-		const res = await fetch(`${this.baseURL}/${endpoint}`, {
-			method: "POST",
+		const res = await api.post<T>(`${this.baseURL}/${endpoint}`, data, {
 			headers: isFormData ? {} : { 'Content-Type': 'application/json' },
-			body: isFormData ? data : JSON.stringify(data),
+			onUploadProgress: (event) => {
+				if (onUploadProgress && event.total) {
+					onUploadProgress(Math.round((event.loaded * 100) / event.total ));
+				}
+			}
 		});
 
-		if (!res.ok) {
-			const err: HttpError = new Error(`HTTP error! status ${res.status}`);
-			err.status = res.status;
-			throw err;
-		}
-
-		return await res.json()
+		return res.data;
 	}
 
 	async patch<T>(

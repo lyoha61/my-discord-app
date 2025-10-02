@@ -1,4 +1,13 @@
+import axios from "axios";
 import { getAccessToken, refreshAccessToken } from "src/services/authService";
+
+export const api = axios.create();
+
+api.interceptors.request.use(config => {
+  const token = getAccessToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config
+});
 
 const originalFetch = window.fetch.bind(window);
 

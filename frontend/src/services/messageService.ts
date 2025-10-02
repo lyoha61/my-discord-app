@@ -24,8 +24,17 @@ export const deleteMessage = (chatId: number, messageId: number): Promise<void> 
 	return httpClient.del(`chats/${chatId}/messages/${messageId}`)
 }
 
-export const uploadFile = async (chatId: string, messageId: string, file: File): Promise<FileInfo> => {
+export const uploadFile = async (
+	chatId: string,
+	messageId: string, 
+	file: File,
+	onProgress?: (progress: number) => void,
+): Promise<FileInfo> => {
 	const formData = new FormData();
 	formData.append("file", file);
-	return httpClient.post<FileInfo>(`chats/${chatId}/messages/${messageId}/file`, formData)
+	return httpClient.post<FileInfo>(
+		`chats/${chatId}/messages/${messageId}/file`, 
+		formData,
+		onProgress,
+	)
 }

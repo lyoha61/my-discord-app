@@ -11,7 +11,7 @@ export const mapMessageToClientWithAuthor = (
 		author_name: author.username,
 		created_at: msg.created_at.toISOString(),
 		updated_at: msg.updated_at.toISOString(),
-		read_at: msg.read_at ? (msg.read_at as Date).toISOString() : null,
+		read_at: msg.read_at ? msg.read_at.toISOString() : null,
 	};
 };
 
@@ -20,7 +20,7 @@ export const mapMessageToClient = (msg: Message): ClientMessageBase => {
 		...msg,
 		created_at: msg.created_at.toISOString(),
 		updated_at: msg.updated_at.toISOString(),
-		read_at: msg.read_at ? (msg.read_at as Date).toISOString() : null,
+		read_at: msg.read_at ? msg.read_at.toISOString() : null,
 	};
 };
 

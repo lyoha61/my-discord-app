@@ -48,13 +48,13 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
 	return (
 		<div 
-			className={`relative flex pt-6  ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+			className={`relative flex pt-6 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 		>
 			{/* Message */}
 			<motion.div 
-				className='flex flex-col flex-1 items-start max-w-[55%]'
+				className='inline-flex w-fit flex-col max-w-[55%]'
 				ref={containerRef}
 				whileHover={{ scale: 1.02 }}
 				initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -63,7 +63,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 				transition={{ duration: 0.25 }}
 			>
 				{/* Nickname */}
-				<div className={`text-xs font-medium mb-1 ${isCurrentUser ? '' : 'text-gray-400'}`}>
+				<div className={`inline-flex w-fit text-xs font-medium mb-1 ${isCurrentUser ? '' : 'text-gray-400'}`}>
 					{isCurrentUser ? '' : `${msg.author_name}`}
 				</div>
 

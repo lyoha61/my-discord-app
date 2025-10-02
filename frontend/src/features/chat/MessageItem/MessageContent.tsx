@@ -119,37 +119,47 @@ export const MessageContent: React.FC<MessageContentProps> = ({
 	return (
 		<div 
 			ref = { messageAllRef }
-			className={`relative flex max-w-[100%] min-w-[15%] text-sm pl-3 pr-1 pt-2  rounded-lg break-all ${
-				isCurrentUser ? 'bg-[#5364E6] self-end' : 'bg-[#2A2A2A]'
-			} ${isMultiLine ? 'flex-col pb-1' : 'flex-row pb-1'} ${
+			className={`relative flex flex-wrap text-sm pl-3 pr-1 pt-2 rounded-lg max-w-full  ${
+				isCurrentUser ? 'bg-[#5364E6]' : 'bg-[#2A2A2A]'
+			} ${isMultiLine || files.length > 0 ? 'flex-col pb-1 items-end pr-3' : 'flex-row pb-1'} ${
 				containerWidth === 'full' ? 'w-full' : 'w-fit'
 			}`}
 		>
-			{isEditing ?(
-					<textarea
-						ref={inputRef}
-						value={editText}
-						onChange={handleTextareaInput}
-						onKeyDown={e => e.key === 'Enter' && onEditSubmit()}
-						className="w-full text-sm outline-none resize-none  overflow-hidden px-0"
-					/>
+			{/* <div className="inline-flex bg-amber-300"> */}
+			
+			{isEditing ? (
+				<textarea
+					ref={inputRef}
+					value={editText}
+					onChange={handleTextareaInput}
+					onKeyDown={e => e.key === 'Enter' && onEditSubmit()}
+					className="w-full text-sm outline-none resize-none  overflow-hidden px-0"
+				/>
 			) : (
 				<>
 					<span 
 						ref={hiddenSpanRef}
-						className="whitespace-pre-wrap break-words absolute invisible text-sm"
+						className="whitespace-pre-wrap break-words absolute invisible text-sm w-fit"
 					/>
 
-					<div className="flex-1" ref={messageTextRef}>
+					<div className="break-words whitespace-pre-wrap max-w-full"  ref={messageTextRef}>
 						{msg.text}
+					</div>
+					
+					<div className="inline-flex flex-wrap justify-center">
 						{files.map(f => (
-									<img key={f.id} src={f.url} alt="Picture" />
+									<img 
+										className="inline-flex max-w-[50%] h-auto"
+										key={f.id} 
+										src={f.url} 
+										alt="Picture"
+									/>
 								))
 						}
 					</div>
 
 					{/* Add info message  */}
-					<div ref = {infoRef} className={`flex justify-end items-center text-xs text-[#ffffff] gap-1 py-1 whitespace-nowrap ${
+					<div ref = {infoRef} className={`w-fit inline-flex justify-end items-center text-xs text-[#ffffff] gap-1 py-1 whitespace-nowrap ${
 						isMultiLine ? "" : 'ml-2'
 					}`}>
 						
@@ -180,7 +190,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
 					</div>
 				</>
 			)}
-		
-		</div>
+			</div>
+		// </div>
 	)
 }

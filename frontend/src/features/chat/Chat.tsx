@@ -85,10 +85,10 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 	if (!chatId) return; 
 
 	return (
-		<div className="flex flex-col h-full w-full  text-white  shadow-lg">
+		<div className="flex flex-col h-full max-w-full  text-white  shadow-lg">
 			<ChatHeader chatId={chatId}/>
 			{/* Messages */}
-			<div className="flex-1 flex flex-col p-4 bg-[#0B0B0B] overflow-auto scrollbar-hidden">
+			<div className="flex-1 flex flex-col bg-[#0B0B0B] overflow-y-auto overflow-x-hidden scrollbar-hidden max-w-full px-2 pb-2">
 				<div className="mt-auto"></div>
 				<AnimatePresence initial={false}>
 					{messages.map((msg) => {
@@ -96,7 +96,10 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 						const showDate = currentDate !== lastDate;
 						lastDate = currentDate;
 						return (
-							<div key={msg.id}>
+							<div 
+								className="inline-flex flex-col"
+								key={msg.id}
+							>
 								{showDate && (
 									<div className="flex justify-center mt-10">
 										<div className="bg-[#393939] rounded-full py-2 px-4 text-xs text-[#D1D5DB]">

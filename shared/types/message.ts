@@ -7,20 +7,21 @@ export interface Message {
 	chat_id: string;
 }
 
+export interface ClientFile {
+	id: string;
+	url: string;
+}
+
 export type ClientMessageBase = Omit<Message, "created_at" | "updated_at" | "read_at"> & {
 	created_at: string;
 	updated_at: string;
 	read_at: string | null;
+	file?: ClientFile[];
 };
 
 export type ClientMessageRead = Omit<Message, "read_at"> & {
 	read_at: string;
 };
-
-export interface ClientFile {
-	id: string;
-	url: string;
-}
 
 export interface ClientMessage extends ClientMessageBase {
 	author_name: string;

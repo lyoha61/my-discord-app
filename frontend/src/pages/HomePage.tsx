@@ -8,7 +8,7 @@ import Chat from "src/features/chat/Chat.tsx";
 import {getAvailableChats} from "src/services/chatSevice.ts";
 
 export const HomePage: React.FC = () => {
-  const [currentChatId, setCurrentChatId] = useState<number | null>(null);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chats, setChats] = useState<ChatResponse[]>([]);
 
   const handleNewChat = (chat: ChatResponse) => {
@@ -36,7 +36,7 @@ export const HomePage: React.FC = () => {
   }, []);
 
 	return (
-    <div className="flex h-screen">
+    <div className="flex h-screen max-w-full">
       <Sidebar />
       <div className="flex flex-col justify-between bg-[#1A1A1A] border border-[#333333]">
         <div>
@@ -51,7 +51,7 @@ export const HomePage: React.FC = () => {
         <UserProfile />
 
       </div>
-		  <div className="flex-1 flex-col max-h-screen items-center">
+		  <div className="flex-1 flex-col max-h-screen max-w-full overflow-hidden items-center">
         <Chat chatId={currentChatId}/>
       </div>
     </div>

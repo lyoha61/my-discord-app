@@ -138,6 +138,9 @@ export class MessageService {
 							}
 						: undefined
 				},
+				include: {
+					file: true
+				}
 			});
 
 			this.logger.log(`Message with id: ${messageId} updated`);
