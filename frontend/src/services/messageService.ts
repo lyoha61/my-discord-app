@@ -4,7 +4,7 @@ import type { GetMessagesOptions } from "src/types/api";
 import type { FileInfo } from "shared/types/file";
 
 export const getMessages = (
-	chatId: number, 
+	chatId: string, 
 	options?: GetMessagesOptions
 ): Promise<MessagesResponse> => {
 

@@ -3,6 +3,7 @@ import {
 	Get,
 	Logger,
 	Param,
+	Query,
 	UseFilters,
 	UseGuards,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { User } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UnauthorizedFilter } from 'src/filters/unauthorized.filter';
 import { UserDto } from './dto/user.dto';
+import { ChatService } from 'src/chat/chat.service';
 
 @Controller('users')
 @UseFilters(new UnauthorizedFilter())
@@ -23,7 +25,10 @@ import { UserDto } from './dto/user.dto';
 export class UserController {
 	private readonly logger = new Logger(UserController.name);
 
-	constructor(private readonly userService: UserService) {}
+	constructor(
+		private readonly userService: UserService,
+		private readonly chatService: ChatService,
+	) {}
 
 	private formattedUser(user: UserDto): UserType {
 		return {
@@ -50,11 +55,20 @@ export class UserController {
 	}
 
 	@Get()
-	async getUsers(@User('id') currentUserId: string): Promise<UsersResponse> {
-		const users = await this.userService.getUsers();
+	async getUsers(
+		@User('id') currentUserId: string,
+		@Query('search') search?: string,
+	): Promise<UsersResponse> {
+		const users = await this.userService.getUsers(search);
+
+		const userChats = await this.chatService.getPrivateChats(currentUserId);
+
+		const usersIdsChats = userChats.flatMap(chat => chat.members.map(m => m.user_id))
 
 		const filteredUsers = users
-			.filter((user) => user.id !== currentUserId)
+			.filter((user) => 
+				user.id !== currentUserId && 
+				!usersIdsChats.includes(user.id))
 			.map((user) => this.formattedUser(user));
 
 		return { users: filteredUsers };

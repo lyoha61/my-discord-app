@@ -2,16 +2,16 @@ import { useEffect, useState } from "react"
 import type { User } from "shared/types/user"
 import { UserCard } from "src/components/UI/UserCard"
 import { getCurrentUserId } from "src/services/authService"
-import { getMembersPrivateChat } from "src/services/chatSevice"
+import { getMembersPrivateChat } from "src/services/chatService"
 import CallIcon from "assets/icons/call.png"
 import VideoCallIcon from "assets/icons/video-call.png"
 
-export const ChatHeader: React.FC<{chatId: number}> = ({ chatId }) => {
+export const ChatHeader: React.FC<{chatId: string}> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
 	const [memberChat, setMemberChat] = useState<User | null>(null);
 
 	useEffect(() => {
-		const fetchMembers = async (chatId: number) => {
+		const fetchMembers = async (chatId: string) => {
 			try {
 				const membersRes = await getMembersPrivateChat(chatId);
 				const members = membersRes.users;
@@ -24,7 +24,7 @@ export const ChatHeader: React.FC<{chatId: number}> = ({ chatId }) => {
 		}
 		if (!chatId) return;
 
-		fetchMembers(chatId);
+		fetchMembers(chatId).catch(err => console.error(err));
 	}, [chatId, currentUserId])
 
 	if (!memberChat) return;

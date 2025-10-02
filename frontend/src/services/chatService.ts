@@ -6,12 +6,12 @@ export const getAvailableChats = (): Promise<PrivateChatsResponse> => {
 	return httpClient.get('chats');
 }
 
-export const getOrCreatePrivateChat = (userId: number): Promise<ChatResponse> => {
+export const getOrCreatePrivateChat = (userId: string): Promise<ChatResponse> => {
 	return httpClient.post<ChatResponse>('chats/private', {user_id: userId})
 }
 
 export const getMembersPrivateChat = (
-	chatId: number, 
+	chatId: string, 
 ): Promise<UsersResponse> => {
 	return httpClient.get<UsersResponse>(`chats/${chatId}/members/`)
 }

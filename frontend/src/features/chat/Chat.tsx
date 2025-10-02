@@ -11,7 +11,7 @@ import { EVENTS } from "shared/types/websocket/events";
 import { ChatHeader } from "./ChatHeader";
 import type {WsMessageBase, WsMessageRead} from "shared/types/websocket/message";
 
-const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
+const Chat: React.FC<{ chatId: string | null }> = ({ chatId }) => {
 	const currentUserId = getCurrentUserId();
 	const [messages, setMessages] = useState<ClientMessage[]>([]);
 	
@@ -33,7 +33,7 @@ const Chat: React.FC<{ chatId: number | null }> = ({ chatId }) => {
 			}
 		};
 
-		fetchMessages();
+		fetchMessages().catch(err => console.error(err));
 		
 		if(!chatSocket) return;
 		

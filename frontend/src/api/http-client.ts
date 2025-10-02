@@ -1,4 +1,3 @@
-import axios from "axios";
 import { API_CONFIG } from "src/config/api";
 import type { QueryParams } from "src/types/api";
 import { api } from "src/utils/fetchInterceptor";
@@ -14,7 +13,7 @@ class HttpClient {
 
 	async get<T>(
 		endpoint: string, 
-		params?: QueryParams
+		params?: QueryParams,
 	): Promise<T> {
 		let url = `${this.baseURL}/${endpoint}`;
 

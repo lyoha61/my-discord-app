@@ -45,8 +45,13 @@ export class UserService {
 		return plainToInstance(UserDto, user);
 	}
 
-	async getUsers(): Promise<UserDto[]> {
-		const users = await this.prisma.user.findMany();
+	async getUsers(search?: string): Promise<UserDto[]> {
+		const users = await this.prisma.user.findMany({
+			where:  search ? {
+				username: { contains: search, mode: 'insensitive' }
+			} : {}
+		});
+		
 		return plainToInstance(UserDto, users);
 	}
 }

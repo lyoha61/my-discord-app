@@ -40,12 +40,12 @@ export const getAccessToken = (): string | null => {
 	return accessToken;
 }
 
-export const getCurrentUserId = (): number | null  => {
+export const getCurrentUserId = (): string | null  => {
 	const token = getAccessToken();
 	if (!token) return null;
 
 	try {
-		const decoded = jwtDecode<{sub: number}>(token);
+		const decoded = jwtDecode<{sub: string}>(token);
 		return decoded.sub;
 	} catch (err) {
 		console.error("Failed to decode token", err);

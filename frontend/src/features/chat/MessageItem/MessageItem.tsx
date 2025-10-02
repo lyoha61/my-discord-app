@@ -80,7 +80,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
 			{/* Actions */}
 			<AnimatePresence>
-				{hovered && !isEditing && (
+				{hovered && !isEditing && isCurrentUser && (
 					<motion.div
 						initial={{ opacity: 0, y: -12 }}
 						animate={{ opacity: 1, y: 0 }}

@@ -4,8 +4,8 @@ import {getCurrentUserId} from "src/services/authService.ts";
 
 export const ChatList: React.FC<{
   chats: ChatResponse[];
-  onSelectChat: (chatId: number) => void;
-  selectedChatId: number | null;
+  onSelectChat: (chatId: string) => void;
+  selectedChatId: string | null;
 }> = ({ chats, onSelectChat, selectedChatId }) => {
   const currentUseId = getCurrentUserId();
 

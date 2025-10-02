@@ -93,7 +93,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({chatId}) => {
 					onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
 				/>
 				{file && 
-					<div className="flex flex-col max-w-[8%] overflow-hidden my-2 h-auto">
+					<div className="flex flex-col max-w-[8%] w-[5%] overflow-hidden my-2 h-auto">
 						<div className="relative flex max-h-[60%] w-fit justify-center">
 							<FileIcon 
 								className="w-10 max-h-full text-[#5364E6] fill-current" 

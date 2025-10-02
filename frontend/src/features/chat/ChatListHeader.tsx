@@ -15,7 +15,7 @@ export const ChatListHeader: React.FC<{
 	const closeSearch = () => setIsSearchOpen(false);
 
 	return (
-		<div className="flex flex-col p-6 border-b border-[#333333]">
+		<div className="flex flex-col p-6 pb-0 border-b border-[#333333]">
 			<div className="flex w-full justify-between items-center mb-6 mt-2">
 				<span className="font-semibold" >Сообщения</span>
 				<img 
@@ -54,6 +54,10 @@ export const ChatListHeader: React.FC<{
 			)} 
 		</AnimatePresence>
 		
+		<div className="flex gap-2 my-3">
+			<button className="cursor-pointer">Директ</button>
+			<button className="cursor-pointer">Группы</button>
+		</div>
 
 		</div>
 	)

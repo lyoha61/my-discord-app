@@ -1,11 +1,11 @@
 import {useEffect, useState} from "react";
 import { ChatList } from "../features/chat/ChatList.js";
 import { ChatListHeader } from "../features/chat/ChatListHeader.js";
-import Sidebar from "../components/Sidebar.js";
+// import Sidebar from "../components/Sidebar.js";
 import { UserProfile } from "src/features/user/UserProfile.js";
 import type {ChatResponse} from "shared/types/chat.js";
 import Chat from "src/features/chat/Chat.tsx";
-import {getAvailableChats} from "src/services/chatSevice.ts";
+import {getAvailableChats} from "src/services/chatService.js";
 
 export const HomePage: React.FC = () => {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -13,8 +13,6 @@ export const HomePage: React.FC = () => {
 
   const handleNewChat = (chat: ChatResponse) => {
     setChats(prev => [...prev, chat]);
-    console.log(chat);
-    console.log(chats);
     setCurrentChatId(chat.id);
   }
 
@@ -32,13 +30,13 @@ export const HomePage: React.FC = () => {
         console.error(err);
       }
     };
-    fetchChats();
+    fetchChats().catch(err => console.error(err));
   }, []);
 
 	return (
     <div className="flex h-screen max-w-full">
-      <Sidebar />
-      <div className="flex flex-col justify-between bg-[#1A1A1A] border border-[#333333]">
+      {/* <Sidebar /> */}
+      <div className="flex flex-col justify-between bg-[#1A1A1A] border border-[#333333] w-auto overflow-auto max-w-[30%]">
         <div>
           <ChatListHeader onOpenChat={handleNewChat} />
           <ChatList

@@ -1,20 +1,34 @@
 import { Input } from "../../components/UI/Input"
 import SearchIcon from "../../assets/icons/search.png";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getUsers } from "src/services/userService";
 import type { User } from "shared/types/user";
 import { UserCard } from "../../components/UI/UserCard";
 import { motion } from "framer-motion";
 import type { ChatResponse } from "shared/types/chat";
-import { getOrCreatePrivateChat } from "src/services/chatSevice";
+import { getOrCreatePrivateChat } from "src/services/chatService";
+import { debounce } from "src/utils/debounce";
 
 export const UserSearch: React.FC<{ 
 	onClose: () => void;
 	onOpenChat: (chat: ChatResponse) => void
 }> = ({ onClose, onOpenChat }) => {
-
+	const [query, setQuery] = useState('');
 	const [users, setUsers] = useState<User[]>([]);
 	const modalRef = useRef<HTMLDivElement>(null);
+
+	const debouncedFetch = useMemo(
+		() => debounce((searchText: string) => {
+				getUsers({search: searchText})
+					.then(data => setUsers(data.users))
+					.catch(console.error);
+		}, 300),
+		[]
+	);
+
+	useEffect(() => {
+		debouncedFetch(query);
+	}, [query, debouncedFetch]);
 
 	const handleOverlayClick = (e: React.MouseEvent) => {
 		if(modalRef.current && !modalRef.current.contains(e.target as Node)) onClose();
@@ -44,7 +58,7 @@ export const UserSearch: React.FC<{
         console.error(err);
       }
 		}
-		fetchUsers();
+		fetchUsers().catch(err => console.error(err));
 	}, [])
 
 
@@ -78,18 +92,24 @@ export const UserSearch: React.FC<{
 							label="Введите имя"
 							className="h-10"
 							icon={<img className="h-4" src={SearchIcon} alt="loop" />}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
 						/>
 					</div>
 
 					<div className="flex-1 scrollbar-hidden overflow-auto rounded-b-2xl ">
-						{users.map(user => (
+						{users.length > 0 
+						? users.map(user => (
 							<UserCard 
 								key={user.id}
 								member={user} 
 								additionalText={user.username}
-								onClick={() => handleUserClick(user)}
+								onClick={() => void handleUserClick(user)}
 							/>
-						))}
+						))
+					: <span className="flex text-center justify-center mt-2">
+							Пользователи не найдены
+						</span>
+					}
 					</div>
 
 				</motion.div>

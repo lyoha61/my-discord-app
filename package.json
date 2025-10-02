@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "dev": "concurrently \"npm run start:dev\" \"npm run start:frontend\"",
+    "debug": "concurrently \"npm run start:debug\" \"npm run start:frontend\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:frontend": "cd frontend && npm run dev",

@@ -19,5 +19,6 @@ import { ChatService } from './chat.service';
 	],
 	providers: [ChatGateway, WsJwtGuard, ChatService],
 	controllers: [ChatController],
+	exports: [ChatService],
 })
 export class ChatModule {}
