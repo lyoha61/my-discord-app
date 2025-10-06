@@ -66,7 +66,7 @@ model File {
   mimetype   String
   size       Int
   type       String
-  message    Message? @relation("MessageFiles", fields: [messageId], references: [id])
+  message    Message? @relation("MessageFiles", fields: [messageId], references: [id], onDelete: Cascade)
   messageId  String?
   created_at DateTime @default(now())
 }

@@ -26,6 +26,7 @@ import { Buckets } from 'src/common/constants/buckets';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFile } from 'src/chat/types/uploadFile';
 import { FileInfo } from 'shared/types/file';
+import { FileKey } from 'src/common/types/s3.types';
 
 @Controller('chats/:chatId/messages')
 @UseGuards(JwtAuthGuard)
@@ -98,7 +99,7 @@ export class MessageController {
 
 		const { originalname, buffer, mimetype, size } = file;
 
-		const key = `${messageId}-${originalname}`;
+		const key: FileKey = `image/${messageId}-${originalname}`;
 		const url = await this.s3Service.uploadFile(Buckets.APP, key, buffer);
 
 		const fileData: UploadFile = {

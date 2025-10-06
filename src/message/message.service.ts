@@ -4,12 +4,18 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { GetMessagesDto } from './dto/get-messages.dto';
 import { MessageWithAuthor, MessageWithReadAt, UpdateMessageInput } from './types/message';
 import { UploadFile } from 'src/chat/types/uploadFile';
+import { S3Service } from 'src/s3/s3.service';
+import { Buckets, BucketTypes } from 'src/common/constants/buckets';
+import { FileEntity, FileKey } from 'src/common/types/s3.types';
 
 @Injectable()
 export class MessageService {
 	private readonly logger = new Logger(MessageService.name);
 
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly s3Service: S3Service,
+	) {}
 
 	protected async findMessage(
 		messageId: string,
@@ -23,6 +29,10 @@ export class MessageService {
 		});
 
 		return message;
+	}
+
+	protected isBucketType(value: string): value is BucketTypes {
+		return Object.values(Buckets).includes(value as BucketTypes)
 	}
 
 	async readMessage(messageId: string): Promise<MessageWithReadAt> {
@@ -159,9 +169,27 @@ export class MessageService {
 					id: messageId,
 					author_id: userId,
 				},
+				include: {
+					file: true,
+				}
 			});
 			if (!result)
 				throw new NotFoundException('Message not found or access denied');
+
+			const files: FileEntity[] = result.file
+			.filter(f => this.isBucketType(f.bucket))
+			.map(f => ({
+				bucket: f.bucket as BucketTypes,
+				key: f.key as FileKey,
+			}))
+
+			console.log(files);
+
+			if (files.length > 0) {
+				for (const file of files) {
+					await this.s3Service.deleteFile(file.bucket, file.key);
+				}
+			}
 
 			this.logger.log(`Message deleted id: ${messageId}`);
 
