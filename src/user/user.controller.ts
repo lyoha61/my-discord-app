@@ -3,9 +3,13 @@ import {
 	Get,
 	Logger,
 	Param,
+	Patch,
+	Post,
 	Query,
+	UploadedFile,
 	UseFilters,
 	UseGuards,
+	UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -18,6 +22,11 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UnauthorizedFilter } from 'src/filters/unauthorized.filter';
 import { UserDto } from './dto/user.dto';
 import { ChatService } from 'src/chat/chat.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileKey } from 'src/common/types/s3.types';
+import { S3Service } from 'src/s3/s3.service';
+import { Buckets } from 'src/common/constants/buckets';
+import { UploadFile } from 'src/chat/types/uploadFile';
 
 @Controller('users')
 @UseFilters(new UnauthorizedFilter())
@@ -28,6 +37,7 @@ export class UserController {
 	constructor(
 		private readonly userService: UserService,
 		private readonly chatService: ChatService,
+		private readonly s3Service: S3Service,
 	) {}
 
 	private formattedUser(user: UserDto): UserType {
@@ -40,7 +50,7 @@ export class UserController {
 
 	@Get('/me')
 	async getMe(@User('id') userId: string): Promise<UserResponse> {
-		const user = await this.userService.getMe(userId);
+		const user = await this.userService.getUser(userId);
 
 		return { user: this.formattedUser(user) };
 	}
@@ -72,5 +82,30 @@ export class UserController {
 			.map((user) => this.formattedUser(user));
 
 		return { users: filteredUsers };
+	}
+
+	@Patch('profile')
+	@UseInterceptors(FileInterceptor('avatar'))
+	async updateUser (
+		@User('id') userId: string,
+		@UploadedFile() file?: Express.Multer.File,
+	) {
+		if (file) {
+			const { originalname, buffer, mimetype, size} = file;
+			const key: FileKey = `avatars/${userId}-${originalname}`;
+			const url = await this.s3Service.uploadFile(Buckets.APP, key, buffer);
+
+			const fileData: UploadFile = {
+				key,
+				url, 
+				bucket: Buckets.APP,
+				filename: originalname,
+				size,
+				mimetype
+			}
+
+			const uploadedFile = await this.userService.loadAvatar(userId, fileData);
+		}
+
 	}
 }

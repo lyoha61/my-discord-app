@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react';
 import type { User } from 'shared/types/user';
 import { getMe } from 'src/services/userService';
 import { logout } from 'src/services/authService';
+import { useNavigate } from 'react-router-dom';
 
 export const UserProfile: React.FC = () => {
-
+	const navigate = useNavigate();
 	const [user, setUser] = useState<User | null>(null)
 
 	useEffect(() => {
@@ -16,7 +17,7 @@ export const UserProfile: React.FC = () => {
 			setUser(data.user);
 		}
 
-		fetchUserProfile();
+		fetchUserProfile().catch(err => console.error(err));
 	}, [])
 
 	if(!user) return;
@@ -24,9 +25,15 @@ export const UserProfile: React.FC = () => {
 	return (
 		<div className="border-t border-[#393939] p-4 pr-6">
 			<div className="flex gap-4">
-				<div className="flex w-12 h-12 rounded-full items-center justify-center bg-gray-400">
-					{/* {user.avatar ? "<img />" : 'AB'} */}
-					AB
+				<div className="flex items-center justify-center">
+					{
+						user.avatar?.url 
+						? <img 
+								className='w-12 aspect-square rounded-full  object-cover'
+								src={user.avatar?.url}
+							/> 
+							: 'AB'
+						}
 				</div>
 				<div className="flex flex-col">
 					<span className="font-semibold">{user.username}</span>
@@ -42,13 +49,14 @@ export const UserProfile: React.FC = () => {
 						className='cursor-pointer h-4' 
 						src={SettingsIcon} 
 						alt="Иконка настройки" 
+						onClick={() => void navigate('/profile/settings')}
 					/>
 
 					<img 
 						className='cursor-pointer h-4.5' 
 						src={SignOutIcon} 
 						alt="" 
-						onClick={logout}
+						onClick={() => void logout()}
 					/>
 					
 				</div>

@@ -28,11 +28,14 @@ export const ChatHeader: React.FC<{chatId: string}> = ({ chatId }) => {
 	}, [chatId, currentUserId])
 
 	if (!memberChat) return;
-
+	console.log(memberChat)
 	return (
 		<div className="flex items-center justify-between bg-[#1A1A1A] border border-[#393939] border-l-0">
 			<UserCard 
-				member={memberChat} 
+				member={{
+					...memberChat,
+					avatar: memberChat.avatar ?? { id: '', url: '/src/assets/default-user-ava.png' }
+				}} 
 				variant="header"
 				onClick={() => {}}
 				isSelected={false}

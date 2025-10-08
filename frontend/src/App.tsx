@@ -4,6 +4,7 @@ import AuthChoice from './pages/AuthChoice';
 import { LoginPage } from './pages/Login';
 import { SocketProvider } from './context/SocketProvider';
 import { HomePage } from "src/pages/HomePage.tsx";
+import { ProfileSettings } from './pages/ProfileSettings';
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
             <HomePage />
           </SocketProvider>
         } />
+        <Route path='/profile/settings' element={<ProfileSettings />} />
       </Routes>
     </Router>
   )

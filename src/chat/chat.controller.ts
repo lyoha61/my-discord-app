@@ -69,6 +69,12 @@ export class ChatController {
 				.map((m) => ({
 					id: m.user_id,
 					username: m.user.username,
+					avatar: m.user.avatar 
+						? {
+							id: m.user.avatar?.id,
+							url: m.user.avatar?.url,
+						} 
+						: undefined
 				})),
 		}));
 
@@ -85,7 +91,7 @@ export class ChatController {
 			throw new NotFoundException(`Chat with id ${chatId} not found`);
 		}
 
-		const formattedUsers = users?.map((user) => ({
+		const formattedUsers = users?.map(({ avatar_id: _avatarId, password: _password, ...user }) => ({
 			...user,
 			created_at: user.created_at.toISOString(),
 			updated_at: user.updated_at.toISOString(),

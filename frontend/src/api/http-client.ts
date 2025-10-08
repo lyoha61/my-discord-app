@@ -54,16 +54,18 @@ class HttpClient {
 		return res.data;
 	}
 
-	async patch<T>(
+	async patch<T, D extends object>(
 		endpoint: string, 
-		data: Record<string, string | number>
+		data: D
 	): Promise<T> {
+		const isFormData = data instanceof FormData;
+
 		const res = await fetch(`${this.baseURL}/${endpoint}` , {
 			method: "PATCH",
-			headers: {
+			headers: isFormData ? {} : {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify(data)
+			body: isFormData ? data : JSON.stringify(data)
 		});
 
 		if (!res.ok) throw new Error(`HTTP error! status ${res.status}`);

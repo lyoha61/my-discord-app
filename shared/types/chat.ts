@@ -3,6 +3,10 @@ import type { UserStatus } from "shared/types/websocket/events";
 export interface MemberPrivateChat {
 	id: string;
 	username: string;
+	avatar?: {
+		id: string,
+		url: string,
+	}
 }
 
 export interface ChatResponse {

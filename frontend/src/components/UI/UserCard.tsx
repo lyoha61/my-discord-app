@@ -5,16 +5,14 @@ import { useSocketContext } from "src/context/SocketContext";
 interface UserCardProps {
 	member: MemberPrivateChat;
 	variant?: "list" | "header";
-	avatar?: string;
 	additionalText?: string;
 	isSelected?: boolean;
-	onClick: (userId: number) => void;
+	onClick: (userId: string) => void;
 }
 
 export const UserCard: React.FC<UserCardProps> = ({
 	member,
 	variant,
-	avatar,
 	additionalText,
 	isSelected,
 	onClick
@@ -55,15 +53,22 @@ export const UserCard: React.FC<UserCardProps> = ({
 			}
 			
 			<div className="relative flex items-center justify-center">
-				<div className="flex items-center justify-center  w-12 h-12 rounded-full bg-gray-400">
-					{avatar ? <img /> : "AB"}
+				<div className="flex items-center justify-center w-12">
+					{
+						member.avatar?.url 
+							? <img 
+									className='w-full aspect-square rounded-full  object-cover'
+									src={member.avatar?.url}
+								/> 
+							: 'AB'
+						}
 				</div>
 				<div className={`absolute border-2 border-[#1A1A1A] right-0 bottom-0 rounded-full w-3.5 h-3.5 ${
 					onlineUsers.includes(member.id) ? 'bg-[#5CB85C]' : 'bg-[#6B7280]'
 				}`}></div>
 			</div>
 
-			<div className="block flex flex-col text-sm w-full gap-0.5">
+			<div className="flex flex-col text-sm w-full gap-0.5">
 				<span className="font-semibold">{member.username}</span>
 				<span className="text-gray-500">{additionalText}</span>
 			</div>

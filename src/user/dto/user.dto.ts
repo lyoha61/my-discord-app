@@ -9,5 +9,8 @@ export class UserDto {
 	updated_at: Date;
 
 	@Exclude()
+	avatar_id: string;
+
+	@Exclude()
 	password: string;
 }

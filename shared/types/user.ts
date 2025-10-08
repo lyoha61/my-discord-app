@@ -5,6 +5,17 @@ export interface User {
 	username: string;
 	created_at: string;
 	updated_at: string;
+	avatar?: {
+		id: string,
+		url: string,
+	}
+}
+
+export type EditableAvatar = Partial<Omit<User, 'avatar'>> & {
+	avatar?: {
+		id?: string; 
+		url: string
+	}
 }
 
 export interface UserResponse {
@@ -13,4 +24,13 @@ export interface UserResponse {
 
 export interface UsersResponse {
 	users: User[];
+}
+
+export interface UpdateUserData {
+	username?: string,
+	name?: string,
+	avatar_id?: string
+	email?: string
+	password?: string
+	
 }

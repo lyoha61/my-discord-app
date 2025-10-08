@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Chat, ChatMember, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ChatWithMembers } from './types/user';
 
 @Injectable()
 export class ChatService {
@@ -57,7 +58,7 @@ export class ChatService {
 		return chat;
 	}
 
-	async getPrivateChats(userId: string): Promise<(Chat & { members: (ChatMember & { user: User })[] })[]> {
+	async getPrivateChats(userId: string): Promise<ChatWithMembers[]> {
 		const chats = await this.prisma.chat.findMany({
 			where: {
 				members: {
@@ -65,7 +66,13 @@ export class ChatService {
 				},
 			},
 			include: {
-				members: { include: { user: true } },
+				members: { 
+					include: { 
+						user: { 
+							include: { avatar:true } 
+						} 
+					} 
+				},
 			},
 		});
 
@@ -76,7 +83,11 @@ export class ChatService {
 		const chatMembers = await this.prisma.chatMember.findMany({
 			where: { chat_id: chatId },
 			include: {
-				user: true,
+				user: {
+					include: {
+						avatar: {select: { id: true, url: true }},
+					}
+				},
 			},
 		});
 		const members = chatMembers.map((chatMember) => chatMember.user);
